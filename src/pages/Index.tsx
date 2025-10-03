@@ -292,7 +292,7 @@ const Index = () => {
           />
           
           {activeTab === "reports" && <Reports stockData={stockData} />}
-          {activeTab === "writeoff" && isAdmin && <WriteOffAct stockData={stockData} />}
+          {activeTab === "writeoff" && isAdmin && <WriteOffAct stockData={stockData} onDataUpdate={loadData} />}
         </Tabs>
       </div>
     </div>

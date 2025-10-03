@@ -8,6 +8,9 @@ import { Textarea } from "@/components/ui/textarea";
 import Icon from "@/components/ui/icon";
 import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { useAuth } from "@/contexts/AuthContext";
+
+const MOVEMENTS_API = 'https://functions.poehali.dev/178c4661-b69a-4921-8960-35d7db62c2d5';
 
 interface StockItem {
   id?: number;
@@ -19,6 +22,7 @@ interface StockItem {
 
 interface WriteOffActProps {
   stockData: StockItem[];
+  onDataUpdate?: () => void;
 }
 
 interface ActItem {
@@ -27,8 +31,9 @@ interface ActItem {
   reason: string;
 }
 
-export function WriteOffAct({ stockData }: WriteOffActProps) {
+export function WriteOffAct({ stockData, onDataUpdate }: WriteOffActProps) {
   const { toast } = useToast();
+  const { user } = useAuth();
   const [actData, setActData] = useState({
     actNumber: `АКТ-${new Date().getFullYear()}-${Date.now().toString().slice(-4)}`,
     date: new Date().toISOString().split('T')[0],
@@ -39,6 +44,7 @@ export function WriteOffAct({ stockData }: WriteOffActProps) {
     { product: null, quantity: 0, reason: '' }
   ]);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const addItem = () => {
     setItems([...items, { product: null, quantity: 0, reason: '' }]);
@@ -68,7 +74,75 @@ export function WriteOffAct({ stockData }: WriteOffActProps) {
     }, 0);
   };
 
-  const printAct = () => {
+  const processWriteOff = async () => {
+    const validItems = items.filter(item => item.product && item.quantity > 0);
+    
+    if (validItems.length === 0) {
+      toast({
+        title: "Ошибка",
+        description: "Добавьте хотя бы один товар для списания",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    for (const item of validItems) {
+      if (item.product && item.quantity > item.product.quantity) {
+        toast({
+          title: "Ошибка",
+          description: `${item.product.name}: недостаточно товара на складе (есть ${item.product.quantity}, требуется ${item.quantity})`,
+          variant: "destructive"
+        });
+        return;
+      }
+    }
+
+    setIsProcessing(true);
+
+    try {
+      for (const item of validItems) {
+        const response = await fetch(MOVEMENTS_API, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            product_id: item.product?.id,
+            movement_type: 'Списание',
+            quantity: item.quantity,
+            user_name: user?.name || 'Администратор',
+            reason: item.reason,
+            notes: `Акт списания ${actData.actNumber}`
+          })
+        });
+
+        if (!response.ok) {
+          throw new Error(`Ошибка при списании ${item.product?.name}`);
+        }
+      }
+
+      toast({
+        title: "Успешно",
+        description: `Акт ${actData.actNumber} проведён, товары списаны со склада`
+      });
+
+      onDataUpdate?.();
+      
+      return true;
+    } catch (error) {
+      toast({
+        title: "Ошибка",
+        description: "Не удалось провести списание",
+        variant: "destructive"
+      });
+      return false;
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const printAct = async () => {
+    const success = await processWriteOff();
+    if (!success) return;
+
     const printWindow = window.open('', '_blank');
     if (!printWindow) return;
 
@@ -206,10 +280,13 @@ export function WriteOffAct({ stockData }: WriteOffActProps) {
       printWindow.print();
     };
 
-    toast({
-      title: "Акт подготовлен",
-      description: "Документ готов к печати"
+    setActData({
+      actNumber: `АКТ-${new Date().getFullYear()}-${Date.now().toString().slice(-4)}`,
+      date: new Date().toISOString().split('T')[0],
+      responsible: '',
+      commission: ''
     });
+    setItems([{ product: null, quantity: 0, reason: '' }]);
   };
 
   return (
@@ -275,9 +352,18 @@ export function WriteOffAct({ stockData }: WriteOffActProps) {
                 <Button variant="outline" onClick={() => setIsPreviewOpen(false)}>
                   Закрыть
                 </Button>
-                <Button onClick={() => { printAct(); setIsPreviewOpen(false); }} className="gap-2">
-                  <Icon name="Printer" size={16} />
-                  Печать
+                <Button onClick={() => { printAct(); setIsPreviewOpen(false); }} className="gap-2" disabled={isProcessing}>
+                  {isProcessing ? (
+                    <>
+                      <Icon name="Loader2" size={16} className="animate-spin" />
+                      Обработка...
+                    </>
+                  ) : (
+                    <>
+                      <Icon name="Printer" size={16} />
+                      Провести и печать
+                    </>
+                  )}
                 </Button>
               </div>
             </DialogContent>
@@ -356,7 +442,13 @@ export function WriteOffAct({ stockData }: WriteOffActProps) {
                       value={item.quantity}
                       onChange={(e) => updateItem(idx, 'quantity', parseInt(e.target.value) || 0)}
                       placeholder="0"
+                      max={item.product?.quantity || 0}
                     />
+                    {item.product && (
+                      <p className="text-xs text-muted-foreground mt-1">
+                        На складе: {item.product.quantity} шт
+                      </p>
+                    )}
                   </div>
                   <div>
                     <Label>Цена за ед.</Label>
@@ -412,9 +504,18 @@ export function WriteOffAct({ stockData }: WriteOffActProps) {
             }}>
               Очистить
             </Button>
-            <Button onClick={printAct} className="gap-2">
-              <Icon name="Printer" size={16} />
-              Сформировать и печать
+            <Button onClick={printAct} className="gap-2" disabled={isProcessing}>
+              {isProcessing ? (
+                <>
+                  <Icon name="Loader2" size={16} className="animate-spin" />
+                  Обработка...
+                </>
+              ) : (
+                <>
+                  <Icon name="Printer" size={16} />
+                  Провести списание и печать
+                </>
+              )}
             </Button>
           </div>
         </div>
