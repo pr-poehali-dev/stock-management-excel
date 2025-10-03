@@ -46,9 +46,10 @@ interface StockTabsProps {
   chartData: ChartDataItem[];
   categoryData: CategoryDataItem[];
   isAdmin: boolean;
+  onDataUpdate?: () => void;
 }
 
-export function StockTabs({ stockData, recentMovements, chartData, categoryData, isAdmin }: StockTabsProps) {
+export function StockTabs({ stockData, recentMovements, chartData, categoryData, isAdmin, onDataUpdate }: StockTabsProps) {
   return (
     <>
       <TabsContent value="dashboard" className="space-y-6 animate-fade-in">

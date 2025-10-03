@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,29 +9,118 @@ import { useAuth } from "@/contexts/AuthContext";
 import LoginPage from "@/components/LoginPage";
 import { StatsCards } from "@/components/StatsCards";
 import { StockTabs } from "@/components/StockTabs";
+import { useToast } from "@/hooks/use-toast";
+
+const STOCK_API = 'https://functions.poehali.dev/854afd98-2bf3-4236-b8b0-7995df44c841';
+const MOVEMENTS_API = 'https://functions.poehali.dev/178c4661-b69a-4921-8960-35d7db62c2d5';
 
 const Index = () => {
   const { isAuthenticated, user, logout, isAdmin } = useAuth();
   const [activeTab, setActiveTab] = useState("dashboard");
+  const [stockData, setStockData] = useState([]);
+  const [recentMovements, setRecentMovements] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [newProductOpen, setNewProductOpen] = useState(false);
+  const [newProduct, setNewProduct] = useState({
+    name: '',
+    sku: '',
+    quantity: 0,
+    min_stock: 0,
+    price: 0,
+    batch: ''
+  });
+  const { toast } = useToast();
+
+  const loadData = async () => {
+    try {
+      const [productsRes, movementsRes] = await Promise.all([
+        fetch(STOCK_API),
+        fetch(MOVEMENTS_API)
+      ]);
+      
+      const productsData = await productsRes.json();
+      const movementsData = await movementsRes.json();
+      
+      const formattedProducts = productsData.products.map((p: any) => ({
+        id: p.id,
+        name: p.name,
+        sku: p.sku,
+        quantity: p.quantity,
+        minStock: p.min_stock,
+        price: p.price,
+        batch: p.batch || '',
+        status: p.quantity < p.min_stock / 2 ? 'Критично' : p.quantity < p.min_stock ? 'Мало' : 'В наличии'
+      }));
+      
+      const formattedMovements = movementsData.movements.map((m: any) => ({
+        date: new Date(m.created_at).toLocaleDateString('ru-RU'),
+        product: m.product_name,
+        type: m.movement_type,
+        quantity: m.movement_type === 'Поступление' ? m.quantity : -m.quantity,
+        user: m.user_name
+      }));
+      
+      setStockData(formattedProducts);
+      setRecentMovements(formattedMovements);
+    } catch (error) {
+      console.error('Error loading data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      loadData();
+    }
+  }, [isAuthenticated]);
+
+  const handleAddProduct = async () => {
+    try {
+      const response = await fetch(STOCK_API, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newProduct)
+      });
+      
+      if (response.ok) {
+        toast({
+          title: "Товар добавлен",
+          description: `${newProduct.name} успешно добавлен в систему`
+        });
+        setNewProductOpen(false);
+        setNewProduct({ name: '', sku: '', quantity: 0, min_stock: 0, price: 0, batch: '' });
+        loadData();
+      } else {
+        toast({
+          title: "Ошибка",
+          description: "Не удалось добавить товар",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Ошибка",
+        description: "Ошибка при добавлении товара",
+        variant: "destructive"
+      });
+    }
+  };
 
   if (!isAuthenticated) {
     return <LoginPage />;
   }
 
-  const stockData = [
-    { name: "Ноутбук Dell XPS 15", sku: "LT-001", quantity: 45, minStock: 20, price: 89900, batch: "2024-09", status: "В наличии" },
-    { name: "Клавиатура Logitech MX", sku: "KB-002", quantity: 8, minStock: 15, price: 12500, batch: "2024-08", status: "Мало" },
-    { name: "Монитор Samsung 27\"", sku: "MN-003", quantity: 23, minStock: 10, price: 24900, batch: "2024-10", status: "В наличии" },
-    { name: "Мышь Razer DeathAdder", sku: "MS-004", quantity: 67, minStock: 30, price: 4500, batch: "2024-09", status: "В наличии" },
-    { name: "Наушники Sony WH-1000XM5", sku: "HP-005", quantity: 3, minStock: 12, price: 32900, batch: "2024-07", status: "Критично" },
-  ];
-
-  const recentMovements = [
-    { date: "2024-10-03", product: "Ноутбук Dell XPS 15", type: "Поступление", quantity: 20, user: "Иванов И.И." },
-    { date: "2024-10-02", product: "Мышь Razer DeathAdder", type: "Списание", quantity: -5, user: "Петрова А.С." },
-    { date: "2024-10-02", product: "Монитор Samsung 27\"", type: "Поступление", quantity: 15, user: "Сидоров П.К." },
-    { date: "2024-10-01", product: "Наушники Sony WH-1000XM5", type: "Списание", quantity: -8, user: "Иванов И.И." },
-  ];
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <Icon name="Loader2" className="animate-spin mx-auto mb-4" size={48} />
+          <p className="text-muted-foreground">Загрузка данных...</p>
+        </div>
+      </div>
+    );
+  }
 
   const chartData = [
     { month: "Май", incoming: 320, outgoing: 180 },
@@ -72,7 +161,7 @@ const Index = () => {
         </div>
 
         <div className="flex items-center justify-end mb-4">
-          <Dialog>
+          <Dialog open={newProductOpen} onOpenChange={setNewProductOpen}>
             <DialogTrigger asChild>
               <Button size="lg" className="gap-2" disabled={!isAdmin}>
                 <Icon name="Plus" size={20} />
@@ -86,21 +175,62 @@ const Index = () => {
               <div className="grid gap-4 py-4">
                 <div className="grid grid-cols-4 items-center gap-4">
                   <Label htmlFor="name" className="text-right">Название</Label>
-                  <Input id="name" className="col-span-3" />
+                  <Input 
+                    id="name" 
+                    className="col-span-3" 
+                    value={newProduct.name}
+                    onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })}
+                  />
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
                   <Label htmlFor="sku" className="text-right">Артикул</Label>
-                  <Input id="sku" className="col-span-3" />
+                  <Input 
+                    id="sku" 
+                    className="col-span-3"
+                    value={newProduct.sku}
+                    onChange={(e) => setNewProduct({ ...newProduct, sku: e.target.value })}
+                  />
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="barcode" className="text-right">Штрихкод</Label>
-                  <Input id="barcode" className="col-span-3" />
+                  <Label htmlFor="quantity" className="text-right">Количество</Label>
+                  <Input 
+                    id="quantity" 
+                    type="number" 
+                    className="col-span-3"
+                    value={newProduct.quantity}
+                    onChange={(e) => setNewProduct({ ...newProduct, quantity: parseInt(e.target.value) })}
+                  />
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="min_stock" className="text-right">Мин. остаток</Label>
+                  <Input 
+                    id="min_stock" 
+                    type="number" 
+                    className="col-span-3"
+                    value={newProduct.min_stock}
+                    onChange={(e) => setNewProduct({ ...newProduct, min_stock: parseInt(e.target.value) })}
+                  />
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
                   <Label htmlFor="price" className="text-right">Цена</Label>
-                  <Input id="price" type="number" className="col-span-3" />
+                  <Input 
+                    id="price" 
+                    type="number" 
+                    className="col-span-3"
+                    value={newProduct.price}
+                    onChange={(e) => setNewProduct({ ...newProduct, price: parseFloat(e.target.value) })}
+                  />
                 </div>
-                <Button className="mt-4">Сохранить</Button>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="batch" className="text-right">Партия</Label>
+                  <Input 
+                    id="batch" 
+                    className="col-span-3"
+                    value={newProduct.batch}
+                    onChange={(e) => setNewProduct({ ...newProduct, batch: e.target.value })}
+                  />
+                </div>
+                <Button className="mt-4" onClick={handleAddProduct}>Сохранить</Button>
               </div>
             </DialogContent>
           </Dialog>
@@ -144,6 +274,7 @@ const Index = () => {
             chartData={chartData} 
             categoryData={categoryData}
             isAdmin={isAdmin}
+            onDataUpdate={loadData}
           />
         </Tabs>
       </div>

@@ -1,0 +1,32 @@
+{
+  "tests": [
+    {
+      "name": "Get all products",
+      "method": "GET",
+      "path": "/",
+      "expectedStatus": 200,
+      "expectedBody": {
+        "products": "array"
+      },
+      "bodyMatcher": "partial"
+    },
+    {
+      "name": "Create new product",
+      "method": "POST",
+      "path": "/",
+      "body": {
+        "name": "Test Product",
+        "sku": "TEST-001",
+        "quantity": 10,
+        "min_stock": 5,
+        "price": 1000,
+        "batch": "2024-10"
+      },
+      "expectedStatus": 201,
+      "expectedBody": {
+        "product": "object"
+      },
+      "bodyMatcher": "partial"
+    }
+  ]
+}
