@@ -17,6 +17,7 @@ import { useToast } from "@/hooks/use-toast";
 const STOCK_API = 'https://functions.poehali.dev/854afd98-2bf3-4236-b8b0-7995df44c841';
 const MOVEMENTS_API = 'https://functions.poehali.dev/178c4661-b69a-4921-8960-35d7db62c2d5';
 const EXPORT_API = 'https://functions.poehali.dev/48cb185d-5567-489a-8908-5e8bc392080f';
+const IMPORT_API = 'https://functions.poehali.dev/1c73e0e3-b0c0-4736-9352-752eb1a20a78';
 
 const Index = () => {
   const { isAuthenticated, user, logout, isAdmin } = useAuth();
@@ -25,6 +26,8 @@ const Index = () => {
   const [recentMovements, setRecentMovements] = useState([]);
   const [loading, setLoading] = useState(true);
   const [newProductOpen, setNewProductOpen] = useState(false);
+  const [importOpen, setImportOpen] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [newProduct, setNewProduct] = useState({
     name: '',
     sku: '',
@@ -146,6 +149,56 @@ const Index = () => {
     }
   };
 
+  const handleImportExcel = async () => {
+    if (!selectedFile) {
+      toast({
+        title: "Ошибка",
+        description: "Выберите файл для импорта",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        const base64 = e.target?.result as string;
+        const base64Data = base64.split(',')[1];
+        
+        const response = await fetch(IMPORT_API, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ file: base64Data })
+        });
+        
+        if (response.ok) {
+          const result = await response.json();
+          toast({
+            title: "Импорт завершен",
+            description: `Добавлено: ${result.inserted}, Обновлено: ${result.updated}`
+          });
+          setImportOpen(false);
+          setSelectedFile(null);
+          loadData();
+        } else {
+          const error = await response.json();
+          toast({
+            title: "Ошибка импорта",
+            description: error.error || "Не удалось импортировать данные",
+            variant: "destructive"
+          });
+        }
+      };
+      reader.readAsDataURL(selectedFile);
+    } catch (error) {
+      toast({
+        title: "Ошибка",
+        description: "Ошибка при импорте данных",
+        variant: "destructive"
+      });
+    }
+  };
+
   if (!isAuthenticated) {
     return <LoginPage />;
   }
@@ -205,6 +258,36 @@ const Index = () => {
             <Icon name="Download" size={20} />
             Скачать Excel
           </Button>
+          <Dialog open={importOpen} onOpenChange={setImportOpen}>
+            <DialogTrigger asChild>
+              <Button size="lg" className="gap-2" variant="outline" disabled={!isAdmin}>
+                <Icon name="Upload" size={20} />
+                Импорт Excel
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Импорт из Excel</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
+                <p className="text-sm text-muted-foreground">
+                  Загрузите Excel файл с товарами. Файл должен содержать колонки: Название, Артикул, Количество, Мин. остаток, Цена, Партия
+                </p>
+                <Input
+                  type="file"
+                  accept=".xlsx,.xls"
+                  onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
+                />
+                {selectedFile && (
+                  <p className="text-sm">Выбран файл: {selectedFile.name}</p>
+                )}
+                <Button className="w-full" onClick={handleImportExcel} disabled={!selectedFile}>
+                  <Icon name="Upload" size={18} className="mr-2" />
+                  Импортировать
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
           <Dialog open={newProductOpen} onOpenChange={setNewProductOpen}>
             <DialogTrigger asChild>
               <Button size="lg" className="gap-2" disabled={!isAdmin}>
