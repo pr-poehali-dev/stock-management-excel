@@ -13,6 +13,7 @@ import { Reports } from "@/components/Reports";
 import { WriteOffAct } from "@/components/WriteOffAct";
 import { NotificationCenter, StockAlerts } from "@/components/NotificationCenter";
 import { useToast } from "@/hooks/use-toast";
+import { useOfflineStorage } from "@/hooks/useOfflineStorage";
 
 const STOCK_API = 'https://functions.poehali.dev/854afd98-2bf3-4236-b8b0-7995df44c841';
 const MOVEMENTS_API = 'https://functions.poehali.dev/178c4661-b69a-4921-8960-35d7db62c2d5';
@@ -21,6 +22,7 @@ const IMPORT_API = 'https://functions.poehali.dev/1c73e0e3-b0c0-4736-9352-752eb1
 
 const Index = () => {
   const { isAuthenticated, user, logout, isAdmin } = useAuth();
+  const { isOnline, offlineData, saveOfflineData } = useOfflineStorage();
   const [activeTab, setActiveTab] = useState("dashboard");
   const [stockData, setStockData] = useState([]);
   const [recentMovements, setRecentMovements] = useState([]);
@@ -39,6 +41,18 @@ const Index = () => {
   const { toast } = useToast();
 
   const loadData = async () => {
+    if (!isOnline && offlineData) {
+      setStockData(offlineData.products || []);
+      setRecentMovements(offlineData.movements || []);
+      setLoading(false);
+      toast({
+        title: "Офлайн режим",
+        description: "Показаны данные из кэша",
+        variant: "default"
+      });
+      return;
+    }
+
     try {
       const [productsRes, movementsRes] = await Promise.all([
         fetch(STOCK_API),
@@ -69,8 +83,19 @@ const Index = () => {
       
       setStockData(formattedProducts);
       setRecentMovements(formattedMovements);
+      
+      saveOfflineData({ products: formattedProducts, movements: formattedMovements });
     } catch (error) {
       console.error('Error loading data:', error);
+      if (offlineData) {
+        setStockData(offlineData.products || []);
+        setRecentMovements(offlineData.movements || []);
+        toast({
+          title: "Ошибка подключения",
+          description: "Показаны данные из кэша",
+          variant: "destructive"
+        });
+      }
     } finally {
       setLoading(false);
     }
@@ -235,7 +260,15 @@ const Index = () => {
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-4xl font-bold tracking-tight">Складской учёт</h1>
-            <p className="text-muted-foreground mt-2">Система управления складом и товарами</p>
+            <p className="text-muted-foreground mt-2 flex items-center gap-2">
+              Система управления складом и товарами
+              {!isOnline && (
+                <span className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-yellow-100 text-yellow-800 text-xs font-medium">
+                  <Icon name="WifiOff" size={14} />
+                  Офлайн
+                </span>
+              )}
+            </p>
           </div>
           <div className="flex items-center gap-4">
             <NotificationCenter stockData={stockData} />
