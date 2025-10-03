@@ -30,7 +30,7 @@ const Index = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [newProduct, setNewProduct] = useState({
     name: '',
-    sku: '',
+    inventory_number: '',
     quantity: 0,
     min_stock: 0,
     price: 0,
@@ -51,7 +51,7 @@ const Index = () => {
       const formattedProducts = productsData.products.map((p: any) => ({
         id: p.id,
         name: p.name,
-        sku: p.sku,
+        inventory_number: p.inventory_number,
         quantity: p.quantity,
         minStock: p.min_stock,
         price: p.price,
@@ -96,7 +96,7 @@ const Index = () => {
           description: `${newProduct.name} успешно добавлен в систему`
         });
         setNewProductOpen(false);
-        setNewProduct({ name: '', sku: '', quantity: 0, min_stock: 0, price: 0, batch: '' });
+        setNewProduct({ name: '', inventory_number: '', quantity: 0, min_stock: 0, price: 0, batch: '' });
         loadData();
       } else {
         toast({
@@ -271,7 +271,7 @@ const Index = () => {
               </DialogHeader>
               <div className="space-y-4 py-4">
                 <p className="text-sm text-muted-foreground">
-                  Загрузите Excel файл с товарами. Файл должен содержать колонки: Название, Артикул, Количество, Мин. остаток, Цена, Партия
+                  Загрузите Excel файл с товарами. Файл должен содержать колонки: Название, Инвентарный номер, Количество, Мин. остаток, Цена, Партия
                 </p>
                 <Input
                   type="file"
@@ -310,12 +310,12 @@ const Index = () => {
                   />
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="sku" className="text-right">Артикул</Label>
+                  <Label htmlFor="inventory_number" className="text-right">Инвентарный номер</Label>
                   <Input 
-                    id="sku" 
+                    id="inventory_number" 
                     className="col-span-3"
-                    value={newProduct.sku}
-                    onChange={(e) => setNewProduct({ ...newProduct, sku: e.target.value })}
+                    value={newProduct.inventory_number}
+                    onChange={(e) => setNewProduct({ ...newProduct, inventory_number: e.target.value })}
                   />
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">

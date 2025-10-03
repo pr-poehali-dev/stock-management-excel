@@ -35,7 +35,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 cur.execute('''
                     SELECT m.id, m.movement_type, m.quantity, m.user_name, 
                            m.reason, m.supplier, m.notes, m.created_at,
-                           p.name as product_name, p.sku
+                           p.name as product_name, p.inventory_number
                     FROM movements m
                     JOIN products p ON m.product_id = p.id
                     ORDER BY m.created_at DESC

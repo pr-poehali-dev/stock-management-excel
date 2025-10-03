@@ -10,13 +10,13 @@ import { useToast } from "@/hooks/use-toast";
 interface StockItem {
   id?: number;
   name: string;
-  sku: string;
+  inventory_number: string;
   quantity: number;
 }
 
 interface BarcodeScannerProps {
   stockData: StockItem[];
-  onScan: (sku: string, quantity: number) => void;
+  onScan: (inventory_number: string, quantity: number) => void;
 }
 
 interface ScannedItem {
@@ -132,7 +132,7 @@ export function BarcodeScanner({ stockData, onScan }: BarcodeScannerProps) {
   }, [isScanning, stockData]);
 
   const handleScan = async (scannedBarcode: string) => {
-    const product = stockData.find(item => item.sku === scannedBarcode);
+    const product = stockData.find(item => item.inventory_number === scannedBarcode);
     
     if (!product) {
       // Если товар не найден в базе, ищем в интернете
@@ -160,12 +160,12 @@ export function BarcodeScanner({ stockData, onScan }: BarcodeScannerProps) {
       return;
     }
 
-    const existingItem = scannedItems.find(item => item.product.sku === scannedBarcode);
+    const existingItem = scannedItems.find(item => item.product.inventory_number === scannedBarcode);
     
     if (existingItem) {
       setScannedItems(items =>
         items.map(item =>
-          item.product.sku === scannedBarcode
+          item.product.inventory_number === scannedBarcode
             ? { ...item, quantity: item.quantity + 1, timestamp: new Date() }
             : item
         )
@@ -194,13 +194,13 @@ export function BarcodeScanner({ stockData, onScan }: BarcodeScannerProps) {
     }
   };
 
-  const updateQuantity = (sku: string, quantity: number) => {
+  const updateQuantity = (inventory_number: string, quantity: number) => {
     if (quantity <= 0) {
-      setScannedItems(items => items.filter(item => item.product.sku !== sku));
+      setScannedItems(items => items.filter(item => item.product.inventory_number !== inventory_number));
     } else {
       setScannedItems(items =>
         items.map(item =>
-          item.product.sku === sku
+          item.product.inventory_number === inventory_number
             ? { ...item, quantity }
             : item
         )
@@ -208,13 +208,13 @@ export function BarcodeScanner({ stockData, onScan }: BarcodeScannerProps) {
     }
   };
 
-  const removeItem = (sku: string) => {
-    setScannedItems(items => items.filter(item => item.product.sku !== sku));
+  const removeItem = (inventory_number: string) => {
+    setScannedItems(items => items.filter(item => item.product.inventory_number !== inventory_number));
   };
 
   const handleSubmitAll = () => {
     scannedItems.forEach(item => {
-      onScan(item.product.sku, item.quantity);
+      onScan(item.product.inventory_number, item.quantity);
     });
     setScannedItems([]);
     toast({
@@ -352,7 +352,7 @@ export function BarcodeScanner({ stockData, onScan }: BarcodeScannerProps) {
           <div className="space-y-2">
             {scannedItems.map((item) => (
               <div 
-                key={item.product.sku} 
+                key={item.product.inventory_number} 
                 className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors"
               >
                 <div className="flex items-center gap-3 flex-1">
@@ -362,7 +362,7 @@ export function BarcodeScanner({ stockData, onScan }: BarcodeScannerProps) {
                   <div className="flex-1">
                     <p className="font-medium">{item.product.name}</p>
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Badge variant="outline">{item.product.sku}</Badge>
+                      <Badge variant="outline">{item.product.inventory_number}</Badge>
                       <span>•</span>
                       <span>{item.timestamp.toLocaleTimeString('ru-RU')}</span>
                     </div>
@@ -372,27 +372,27 @@ export function BarcodeScanner({ stockData, onScan }: BarcodeScannerProps) {
                   <Button
                     variant="outline"
                     size="icon"
-                    onClick={() => updateQuantity(item.product.sku, item.quantity - 1)}
+                    onClick={() => updateQuantity(item.product.inventory_number, item.quantity - 1)}
                   >
                     <Icon name="Minus" size={16} />
                   </Button>
                   <Input
                     type="number"
                     value={item.quantity}
-                    onChange={(e) => updateQuantity(item.product.sku, parseInt(e.target.value) || 0)}
+                    onChange={(e) => updateQuantity(item.product.inventory_number, parseInt(e.target.value) || 0)}
                     className="w-20 text-center"
                   />
                   <Button
                     variant="outline"
                     size="icon"
-                    onClick={() => updateQuantity(item.product.sku, item.quantity + 1)}
+                    onClick={() => updateQuantity(item.product.inventory_number, item.quantity + 1)}
                   >
                     <Icon name="Plus" size={16} />
                   </Button>
                   <Button
                     variant="ghost"
                     size="icon"
-                    onClick={() => removeItem(item.product.sku)}
+                    onClick={() => removeItem(item.product.inventory_number)}
                     className="text-destructive hover:text-destructive"
                   >
                     <Icon name="Trash2" size={16} />

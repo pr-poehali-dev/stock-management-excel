@@ -80,7 +80,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 continue
             
             name = str(row[0]) if row[0] else ''
-            sku = str(row[1]) if row[1] else ''
+            inventory_number = str(row[1]) if row[1] else ''
             quantity = int(row[2]) if row[2] else 0
             min_stock = int(row[3]) if row[3] else 0
             price = float(row[4]) if row[4] else 0.0
@@ -88,7 +88,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             
             products.append({
                 'name': name,
-                'sku': sku,
+                'inventory_number': inventory_number,
                 'quantity': quantity,
                 'min_stock': min_stock,
                 'price': price,
@@ -103,8 +103,8 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         
         for product in products:
             cursor.execute("""
-                SELECT id FROM t_p72161094_stock_management_exc.products WHERE sku = %s
-            """, (product['sku'],))
+                SELECT id FROM t_p72161094_stock_management_exc.products WHERE inventory_number = %s
+            """, (product['inventory_number'],))
             
             existing = cursor.fetchone()
             
@@ -112,16 +112,16 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 cursor.execute("""
                     UPDATE t_p72161094_stock_management_exc.products
                     SET name = %s, quantity = %s, min_stock = %s, price = %s, batch = %s, updated_at = NOW()
-                    WHERE sku = %s
+                    WHERE inventory_number = %s
                 """, (product['name'], product['quantity'], product['min_stock'], 
-                      product['price'], product['batch'], product['sku']))
+                      product['price'], product['batch'], product['inventory_number']))
                 updated += 1
             else:
                 cursor.execute("""
                     INSERT INTO t_p72161094_stock_management_exc.products 
-                    (name, sku, quantity, min_stock, price, batch)
+                    (name, inventory_number, quantity, min_stock, price, batch)
                     VALUES (%s, %s, %s, %s, %s, %s)
-                """, (product['name'], product['sku'], product['quantity'], 
+                """, (product['name'], product['inventory_number'], product['quantity'], 
                       product['min_stock'], product['price'], product['batch']))
                 inserted += 1
         

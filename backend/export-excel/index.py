@@ -53,7 +53,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         cursor = conn.cursor()
         
         cursor.execute("""
-            SELECT name, sku, quantity, min_stock, price, batch, created_at, updated_at
+            SELECT name, inventory_number, quantity, min_stock, price, batch, created_at, updated_at
             FROM t_p72161094_stock_management_exc.products
             ORDER BY name
         """)
@@ -80,7 +80,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     header_alignment = Alignment(horizontal="center", vertical="center")
     
     # Headers
-    headers = ["Название", "Артикул", "Количество", "Мин. остаток", "Цена (₽)", "Партия", "Создан", "Обновлен"]
+    headers = ["Название", "Инвентарный номер", "Количество", "Мин. остаток", "Цена (₽)", "Партия", "Создан", "Обновлен"]
     ws.append(headers)
     
     for cell in ws[1]:
@@ -90,10 +90,10 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     
     # Data rows
     for product in products:
-        name, sku, quantity, min_stock, price, batch, created_at, updated_at = product
+        name, inventory_number, quantity, min_stock, price, batch, created_at, updated_at = product
         ws.append([
             name,
-            sku,
+            inventory_number,
             quantity,
             min_stock,
             float(price) if price else 0,

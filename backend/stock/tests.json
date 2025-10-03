@@ -16,7 +16,7 @@
       "path": "/",
       "body": {
         "name": "Test Product",
-        "sku": "TEST-001",
+        "inventory_number": "TEST-001",
         "quantity": 10,
         "min_stock": 5,
         "price": 1000,

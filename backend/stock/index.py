@@ -33,7 +33,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         if method == 'GET':
             with conn.cursor(cursor_factory=RealDictCursor) as cur:
                 cur.execute('''
-                    SELECT id, name, sku, quantity, min_stock, price, batch, 
+                    SELECT id, name, inventory_number, quantity, min_stock, price, batch, 
                            created_at, updated_at
                     FROM products
                     ORDER BY created_at DESC
@@ -60,7 +60,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         elif method == 'POST':
             body = json.loads(event.get('body', '{}'))
             name = body.get('name')
-            sku = body.get('sku')
+            inventory_number = body.get('inventory_number')
             quantity = body.get('quantity', 0)
             min_stock = body.get('min_stock', 0)
             price = body.get('price')
@@ -68,10 +68,10 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             
             with conn.cursor(cursor_factory=RealDictCursor) as cur:
                 cur.execute('''
-                    INSERT INTO products (name, sku, quantity, min_stock, price, batch)
+                    INSERT INTO products (name, inventory_number, quantity, min_stock, price, batch)
                     VALUES (%s, %s, %s, %s, %s, %s)
-                    RETURNING id, name, sku, quantity, min_stock, price, batch, created_at
-                ''', (name, sku, quantity, min_stock, price, batch))
+                    RETURNING id, name, inventory_number, quantity, min_stock, price, batch, created_at
+                ''', (name, inventory_number, quantity, min_stock, price, batch))
                 
                 product = cur.fetchone()
                 product['price'] = float(product['price'])

@@ -9,7 +9,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 interface StockItem {
   id?: number;
   name: string;
-  sku: string;
+  inventory_number: string;
   quantity: number;
   minStock: number;
   status: string;
@@ -21,7 +21,7 @@ interface Notification {
   title: string;
   message: string;
   productName: string;
-  productSku: string;
+  productInventoryNumber: string;
   currentStock: number;
   minStock: number;
   timestamp: Date;
@@ -48,12 +48,12 @@ export function NotificationCenter({ stockData }: NotificationCenterProps) {
       
       if (item.quantity === 0) {
         newNotifications.push({
-          id: `${item.sku}-out-${Date.now()}`,
+          id: `${item.inventory_number}-out-${Date.now()}`,
           type: 'critical',
           title: 'Товар закончился',
           message: `${item.name} полностью отсутствует на складе`,
           productName: item.name,
-          productSku: item.sku,
+          productInventoryNumber: item.inventory_number,
           currentStock: item.quantity,
           minStock: item.minStock,
           timestamp: new Date(),
@@ -61,12 +61,12 @@ export function NotificationCenter({ stockData }: NotificationCenterProps) {
         });
       } else if (item.quantity <= criticalThreshold) {
         newNotifications.push({
-          id: `${item.sku}-critical-${Date.now()}`,
+          id: `${item.inventory_number}-critical-${Date.now()}`,
           type: 'critical',
           title: 'Критически низкий остаток',
           message: `${item.name} - осталось ${item.quantity} шт (требуется ${item.minStock} шт)`,
           productName: item.name,
-          productSku: item.sku,
+          productInventoryNumber: item.inventory_number,
           currentStock: item.quantity,
           minStock: item.minStock,
           timestamp: new Date(),
@@ -74,12 +74,12 @@ export function NotificationCenter({ stockData }: NotificationCenterProps) {
         });
       } else if (item.quantity <= item.minStock) {
         newNotifications.push({
-          id: `${item.sku}-warning-${Date.now()}`,
+          id: `${item.inventory_number}-warning-${Date.now()}`,
           type: 'warning',
           title: 'Низкий остаток',
           message: `${item.name} - осталось ${item.quantity} шт (минимум ${item.minStock} шт)`,
           productName: item.name,
-          productSku: item.sku,
+          productInventoryNumber: item.inventory_number,
           currentStock: item.quantity,
           minStock: item.minStock,
           timestamp: new Date(),
@@ -89,8 +89,8 @@ export function NotificationCenter({ stockData }: NotificationCenterProps) {
     });
 
     setNotifications(prev => {
-      const existingIds = new Set(prev.map(n => n.productSku));
-      const uniqueNew = newNotifications.filter(n => !existingIds.has(n.productSku));
+      const existingIds = new Set(prev.map(n => n.productInventoryNumber));
+      const uniqueNew = newNotifications.filter(n => !existingIds.has(n.productInventoryNumber));
       return [...uniqueNew, ...prev].slice(0, 50);
     });
   };
@@ -198,7 +198,7 @@ export function NotificationCenter({ stockData }: NotificationCenterProps) {
                       </p>
                       <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground">
                         <Badge variant="outline" className="text-xs">
-                          {notification.productSku}
+                          {notification.productInventoryNumber}
                         </Badge>
                         <span>•</span>
                         <span>{notification.timestamp.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}</span>
@@ -264,7 +264,7 @@ export function StockAlerts({ stockData }: NotificationCenterProps) {
               </h3>
               <div className="space-y-2">
                 {criticalItems.map((item) => (
-                  <div key={item.sku} className="flex items-center justify-between text-sm">
+                  <div key={item.inventory_number} className="flex items-center justify-between text-sm">
                     <span className="font-medium">{item.name}</span>
                     <Badge variant="destructive">
                       {item.quantity === 0 ? 'Нет в наличии' : `Осталось ${item.quantity} шт`}
@@ -289,7 +289,7 @@ export function StockAlerts({ stockData }: NotificationCenterProps) {
               </h3>
               <div className="space-y-2">
                 {alerts.filter(item => item.quantity > item.minStock / 2).map((item) => (
-                  <div key={item.sku} className="flex items-center justify-between text-sm">
+                  <div key={item.inventory_number} className="flex items-center justify-between text-sm">
                     <span className="font-medium text-yellow-900">{item.name}</span>
                     <Badge variant="outline" className="border-yellow-600 text-yellow-700">
                       {item.quantity} / {item.minStock} шт

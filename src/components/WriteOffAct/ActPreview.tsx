@@ -51,7 +51,7 @@ export function ActPreview({
                 <tr className="bg-muted">
                   <th className="border p-2">№</th>
                   <th className="border p-2">Наименование</th>
-                  <th className="border p-2">Артикул</th>
+                  <th className="border p-2">Инвентарный номер</th>
                   <th className="border p-2">Кол-во</th>
                   <th className="border p-2">Цена</th>
                   <th className="border p-2">Сумма</th>
@@ -63,7 +63,7 @@ export function ActPreview({
                   <tr key={idx}>
                     <td className="border p-2">{idx + 1}</td>
                     <td className="border p-2">{item.product?.name}</td>
-                    <td className="border p-2">{item.product?.sku}</td>
+                    <td className="border p-2">{item.product?.inventory_number}</td>
                     <td className="border p-2">{item.quantity} шт</td>
                     <td className="border p-2">{item.product?.price.toLocaleString('ru-RU')} ₽</td>
                     <td className="border p-2">{((item.product?.price || 0) * item.quantity).toLocaleString('ru-RU')} ₽</td>

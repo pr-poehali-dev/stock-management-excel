@@ -26,7 +26,7 @@ interface Movement {
 interface StockItem {
   id?: number;
   name: string;
-  sku: string;
+  inventory_number: string;
   quantity: number;
 }
 

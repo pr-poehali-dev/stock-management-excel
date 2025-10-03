@@ -19,7 +19,7 @@ const MOVEMENTS_API = 'https://functions.poehali.dev/178c4661-b69a-4921-8960-35d
 interface StockItem {
   id?: number;
   name: string;
-  sku: string;
+  inventory_number: string;
   quantity: number;
   minStock: number;
   price: number;
@@ -71,8 +71,8 @@ export function StockTabs({ stockData, recentMovements, chartData, categoryData,
     notes: ''
   });
 
-  const handleBarcodeIncoming = async (sku: string, quantity: number) => {
-    const product = stockData.find(item => item.sku === sku);
+  const handleBarcodeIncoming = async (inventory_number: string, quantity: number) => {
+    const product = stockData.find(item => item.inventory_number === inventory_number);
     if (!product?.id) return;
 
     try {
@@ -379,13 +379,13 @@ export function StockTabs({ stockData, recentMovements, chartData, categoryData,
         <Card className="p-6">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-semibold">Остатки товаров</h3>
-            <Input placeholder="Поиск по названию или артикулу" className="max-w-xs" />
+            <Input placeholder="Поиск по названию или инвентарному номеру" className="max-w-xs" />
           </div>
           <Table>
             <TableHeader>
               <TableRow>
                 <TableHead>Название</TableHead>
-                <TableHead>Артикул</TableHead>
+                <TableHead>Инвентарный номер</TableHead>
                 <TableHead>Количество</TableHead>
                 <TableHead>Партия</TableHead>
                 <TableHead>Цена</TableHead>
@@ -395,9 +395,9 @@ export function StockTabs({ stockData, recentMovements, chartData, categoryData,
             <TableBody>
               {stockData.length > 0 ? (
                 stockData.map((item) => (
-                  <TableRow key={item.sku}>
+                  <TableRow key={item.inventory_number}>
                     <TableCell className="font-medium">{item.name}</TableCell>
-                    <TableCell>{item.sku}</TableCell>
+                    <TableCell>{item.inventory_number}</TableCell>
                     <TableCell>{item.quantity} шт</TableCell>
                     <TableCell>{item.batch}</TableCell>
                     <TableCell>{item.price.toLocaleString()} ₽</TableCell>
