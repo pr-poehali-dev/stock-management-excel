@@ -241,66 +241,37 @@ export function StockAlerts({ stockData }: NotificationCenterProps) {
 
   useEffect(() => {
     const lowStockItems = stockData.filter(item => 
-      item.quantity <= item.minStock
+      item.quantity <= item.minStock && item.quantity > item.minStock / 2
     );
     setAlerts(lowStockItems);
   }, [stockData]);
 
   if (alerts.length === 0) return null;
 
-  const criticalItems = alerts.filter(item => item.quantity <= item.minStock / 2);
-
   return (
     <div className="space-y-4">
-      {criticalItems.length > 0 && (
-        <Card className="p-4 border-destructive bg-destructive/5">
-          <div className="flex items-start gap-3">
-            <div className="h-10 w-10 rounded-lg bg-destructive/10 flex items-center justify-center flex-shrink-0">
-              <Icon name="AlertTriangle" className="text-destructive" size={20} />
-            </div>
-            <div className="flex-1">
-              <h3 className="font-semibold text-destructive mb-2">
-                Критический уровень запасов
-              </h3>
-              <div className="space-y-2">
-                {criticalItems.map((item) => (
-                  <div key={item.inventory_number} className="flex items-center justify-between text-sm">
-                    <span className="font-medium">{item.name}</span>
-                    <Badge variant="destructive">
-                      {item.quantity === 0 ? 'Нет в наличии' : `Осталось ${item.quantity} шт`}
-                    </Badge>
-                  </div>
-                ))}
-              </div>
+      <Card className="p-4 border-yellow-600 bg-yellow-50">
+        <div className="flex items-start gap-3">
+          <div className="h-10 w-10 rounded-lg bg-yellow-100 flex items-center justify-center flex-shrink-0">
+            <Icon name="AlertCircle" className="text-yellow-600" size={20} />
+          </div>
+          <div className="flex-1">
+            <h3 className="font-semibold text-yellow-800 mb-2">
+              Требуется пополнение
+            </h3>
+            <div className="space-y-2">
+              {alerts.map((item) => (
+                <div key={item.inventory_number} className="flex items-center justify-between text-sm">
+                  <span className="font-medium text-yellow-900">{item.name}</span>
+                  <Badge variant="outline" className="border-yellow-600 text-yellow-700">
+                    {item.quantity} / {item.minStock} шт
+                  </Badge>
+                </div>
+              ))}
             </div>
           </div>
-        </Card>
-      )}
-
-      {alerts.filter(item => item.quantity > item.minStock / 2).length > 0 && (
-        <Card className="p-4 border-yellow-600 bg-yellow-50">
-          <div className="flex items-start gap-3">
-            <div className="h-10 w-10 rounded-lg bg-yellow-100 flex items-center justify-center flex-shrink-0">
-              <Icon name="AlertCircle" className="text-yellow-600" size={20} />
-            </div>
-            <div className="flex-1">
-              <h3 className="font-semibold text-yellow-800 mb-2">
-                Требуется пополнение
-              </h3>
-              <div className="space-y-2">
-                {alerts.filter(item => item.quantity > item.minStock / 2).map((item) => (
-                  <div key={item.inventory_number} className="flex items-center justify-between text-sm">
-                    <span className="font-medium text-yellow-900">{item.name}</span>
-                    <Badge variant="outline" className="border-yellow-600 text-yellow-700">
-                      {item.quantity} / {item.minStock} шт
-                    </Badge>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </Card>
-      )}
+        </div>
+      </Card>
     </div>
   );
 }
