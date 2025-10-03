@@ -10,6 +10,7 @@ import Icon from "@/components/ui/icon";
 import { Badge } from "@/components/ui/badge";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 import { UserAddDialog, UsersTable } from "./UserManagement";
+import { BarcodeScanner } from "./BarcodeScanner";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 
@@ -69,6 +70,31 @@ export function StockTabs({ stockData, recentMovements, chartData, categoryData,
     reason: '',
     notes: ''
   });
+
+  const handleBarcodeIncoming = async (sku: string, quantity: number) => {
+    const product = stockData.find(item => item.sku === sku);
+    if (!product?.id) return;
+
+    try {
+      const response = await fetch(MOVEMENTS_API, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          product_id: product.id,
+          movement_type: 'Поступление',
+          quantity: quantity,
+          user_name: user?.name || 'Пользователь',
+          supplier: 'Сканирование штрих-кода'
+        })
+      });
+
+      if (response.ok) {
+        onDataUpdate?.();
+      }
+    } catch (error) {
+      console.error('Error processing barcode incoming:', error);
+    }
+  };
 
   const handleIncoming = async () => {
     if (!incomingForm.product_id || incomingForm.quantity <= 0) {
@@ -247,8 +273,10 @@ export function StockTabs({ stockData, recentMovements, chartData, categoryData,
       </TabsContent>
 
       <TabsContent value="incoming" className="space-y-6 animate-fade-in">
+        <BarcodeScanner stockData={stockData} onScan={handleBarcodeIncoming} />
+        
         <Card className="p-6">
-          <h3 className="text-lg font-semibold mb-4">Поступление товаров</h3>
+          <h3 className="text-lg font-semibold mb-4">Ручное поступление товаров</h3>
           <div className="space-y-4">
             <div className="grid gap-4 md:grid-cols-2">
               <div>
