@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -7,10 +8,15 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import Icon from "@/components/ui/icon";
 import { Badge } from "@/components/ui/badge";
-import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 import { UserAddDialog, UsersTable } from "./UserManagement";
+import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/hooks/use-toast";
+
+const MOVEMENTS_API = 'https://functions.poehali.dev/178c4661-b69a-4921-8960-35d7db62c2d5';
 
 interface StockItem {
+  id?: number;
   name: string;
   sku: string;
   quantity: number;
@@ -50,6 +56,113 @@ interface StockTabsProps {
 }
 
 export function StockTabs({ stockData, recentMovements, chartData, categoryData, isAdmin, onDataUpdate }: StockTabsProps) {
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const [incomingForm, setIncomingForm] = useState({
+    product_id: '',
+    quantity: 0,
+    supplier: ''
+  });
+  const [outgoingForm, setOutgoingForm] = useState({
+    product_id: '',
+    quantity: 0,
+    reason: '',
+    notes: ''
+  });
+
+  const handleIncoming = async () => {
+    if (!incomingForm.product_id || incomingForm.quantity <= 0) {
+      toast({
+        title: "Ошибка",
+        description: "Заполните все поля",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      const response = await fetch(MOVEMENTS_API, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          product_id: parseInt(incomingForm.product_id),
+          movement_type: 'Поступление',
+          quantity: incomingForm.quantity,
+          user_name: user?.name || 'Пользователь',
+          supplier: incomingForm.supplier
+        })
+      });
+
+      if (response.ok) {
+        toast({
+          title: "Успешно",
+          description: `Поступление на ${incomingForm.quantity} шт проведено`
+        });
+        setIncomingForm({ product_id: '', quantity: 0, supplier: '' });
+        onDataUpdate?.();
+      } else {
+        toast({
+          title: "Ошибка",
+          description: "Не удалось провести поступление",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Ошибка",
+        description: "Ошибка при проведении операции",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleOutgoing = async () => {
+    if (!outgoingForm.product_id || outgoingForm.quantity <= 0) {
+      toast({
+        title: "Ошибка",
+        description: "Заполните все поля",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      const response = await fetch(MOVEMENTS_API, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          product_id: parseInt(outgoingForm.product_id),
+          movement_type: 'Списание',
+          quantity: outgoingForm.quantity,
+          user_name: user?.name || 'Пользователь',
+          reason: outgoingForm.reason,
+          notes: outgoingForm.notes
+        })
+      });
+
+      if (response.ok) {
+        toast({
+          title: "Успешно",
+          description: `Списание на ${outgoingForm.quantity} шт проведено`
+        });
+        setOutgoingForm({ product_id: '', quantity: 0, reason: '', notes: '' });
+        onDataUpdate?.();
+      } else {
+        toast({
+          title: "Ошибка",
+          description: "Не удалось провести списание",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Ошибка",
+        description: "Ошибка при проведении операции",
+        variant: "destructive"
+      });
+    }
+  };
+
   return (
     <>
       <TabsContent value="dashboard" className="space-y-6 animate-fade-in">
@@ -105,21 +218,29 @@ export function StockTabs({ stockData, recentMovements, chartData, categoryData,
               </TableRow>
             </TableHeader>
             <TableBody>
-              {recentMovements.map((movement, idx) => (
-                <TableRow key={idx}>
-                  <TableCell>{movement.date}</TableCell>
-                  <TableCell className="font-medium">{movement.product}</TableCell>
-                  <TableCell>
-                    <Badge variant={movement.type === "Поступление" ? "default" : "destructive"}>
-                      {movement.type}
-                    </Badge>
+              {recentMovements.length > 0 ? (
+                recentMovements.map((movement, idx) => (
+                  <TableRow key={idx}>
+                    <TableCell>{movement.date}</TableCell>
+                    <TableCell className="font-medium">{movement.product}</TableCell>
+                    <TableCell>
+                      <Badge variant={movement.type === "Поступление" ? "default" : "destructive"}>
+                        {movement.type}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className={movement.quantity > 0 ? "text-secondary" : "text-destructive"}>
+                      {movement.quantity > 0 ? "+" : ""}{movement.quantity}
+                    </TableCell>
+                    <TableCell>{movement.user}</TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={5} className="text-center text-muted-foreground">
+                    Нет операций
                   </TableCell>
-                  <TableCell className={movement.quantity > 0 ? "text-secondary" : "text-destructive"}>
-                    {movement.quantity > 0 ? "+" : ""}{movement.quantity}
-                  </TableCell>
-                  <TableCell>{movement.user}</TableCell>
                 </TableRow>
-              ))}
+              )}
             </TableBody>
           </Table>
         </Card>
@@ -132,40 +253,36 @@ export function StockTabs({ stockData, recentMovements, chartData, categoryData,
             <div className="grid gap-4 md:grid-cols-2">
               <div>
                 <Label>Товар</Label>
-                <Select>
+                <Select value={incomingForm.product_id} onValueChange={(val) => setIncomingForm({ ...incomingForm, product_id: val })}>
                   <SelectTrigger>
                     <SelectValue placeholder="Выберите товар" />
                   </SelectTrigger>
                   <SelectContent>
                     {stockData.map((item) => (
-                      <SelectItem key={item.sku} value={item.sku}>{item.name}</SelectItem>
+                      <SelectItem key={item.id} value={item.id?.toString() || ''}>{item.name}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
               <div>
                 <Label>Количество</Label>
-                <Input type="number" placeholder="0" />
+                <Input 
+                  type="number" 
+                  placeholder="0" 
+                  value={incomingForm.quantity}
+                  onChange={(e) => setIncomingForm({ ...incomingForm, quantity: parseInt(e.target.value) || 0 })}
+                />
               </div>
-              <div>
-                <Label>Партия</Label>
-                <Input placeholder="2024-10" />
-              </div>
-              <div>
+              <div className="md:col-span-2">
                 <Label>Поставщик</Label>
-                <Select>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Выберите поставщика" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="supplier1">ООО "Технопоставка"</SelectItem>
-                    <SelectItem value="supplier2">ИП Иванов</SelectItem>
-                    <SelectItem value="supplier3">ООО "МегаТех"</SelectItem>
-                  </SelectContent>
-                </Select>
+                <Input 
+                  placeholder="Название поставщика"
+                  value={incomingForm.supplier}
+                  onChange={(e) => setIncomingForm({ ...incomingForm, supplier: e.target.value })}
+                />
               </div>
             </div>
-            <Button size="lg" className="w-full gap-2">
+            <Button size="lg" className="w-full gap-2" onClick={handleIncoming}>
               <Icon name="PackagePlus" size={20} />
               Провести поступление
             </Button>
@@ -180,40 +297,49 @@ export function StockTabs({ stockData, recentMovements, chartData, categoryData,
             <div className="grid gap-4 md:grid-cols-2">
               <div>
                 <Label>Товар</Label>
-                <Select>
+                <Select value={outgoingForm.product_id} onValueChange={(val) => setOutgoingForm({ ...outgoingForm, product_id: val })}>
                   <SelectTrigger>
                     <SelectValue placeholder="Выберите товар" />
                   </SelectTrigger>
                   <SelectContent>
                     {stockData.map((item) => (
-                      <SelectItem key={item.sku} value={item.sku}>{item.name}</SelectItem>
+                      <SelectItem key={item.id} value={item.id?.toString() || ''}>{item.name}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
               <div>
                 <Label>Количество</Label>
-                <Input type="number" placeholder="0" />
+                <Input 
+                  type="number" 
+                  placeholder="0"
+                  value={outgoingForm.quantity}
+                  onChange={(e) => setOutgoingForm({ ...outgoingForm, quantity: parseInt(e.target.value) || 0 })}
+                />
               </div>
               <div>
                 <Label>Причина</Label>
-                <Select>
+                <Select value={outgoingForm.reason} onValueChange={(val) => setOutgoingForm({ ...outgoingForm, reason: val })}>
                   <SelectTrigger>
                     <SelectValue placeholder="Выберите причину" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="sale">Продажа</SelectItem>
-                    <SelectItem value="defect">Брак</SelectItem>
-                    <SelectItem value="write-off">Списание</SelectItem>
+                    <SelectItem value="Продажа">Продажа</SelectItem>
+                    <SelectItem value="Брак">Брак</SelectItem>
+                    <SelectItem value="Списание">Списание</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               <div>
                 <Label>Примечание</Label>
-                <Input placeholder="Дополнительная информация" />
+                <Input 
+                  placeholder="Дополнительная информация"
+                  value={outgoingForm.notes}
+                  onChange={(e) => setOutgoingForm({ ...outgoingForm, notes: e.target.value })}
+                />
               </div>
             </div>
-            <Button size="lg" variant="destructive" className="w-full gap-2">
+            <Button size="lg" variant="destructive" className="w-full gap-2" onClick={handleOutgoing}>
               <Icon name="PackageMinus" size={20} />
               Провести списание
             </Button>
@@ -239,28 +365,36 @@ export function StockTabs({ stockData, recentMovements, chartData, categoryData,
               </TableRow>
             </TableHeader>
             <TableBody>
-              {stockData.map((item) => (
-                <TableRow key={item.sku}>
-                  <TableCell className="font-medium">{item.name}</TableCell>
-                  <TableCell>{item.sku}</TableCell>
-                  <TableCell>{item.quantity} шт</TableCell>
-                  <TableCell>{item.batch}</TableCell>
-                  <TableCell>{item.price.toLocaleString()} ₽</TableCell>
-                  <TableCell>
-                    <Badge
-                      variant={
-                        item.quantity < item.minStock / 2
-                          ? "destructive"
-                          : item.quantity < item.minStock
-                          ? "default"
-                          : "secondary"
-                      }
-                    >
-                      {item.status}
-                    </Badge>
+              {stockData.length > 0 ? (
+                stockData.map((item) => (
+                  <TableRow key={item.sku}>
+                    <TableCell className="font-medium">{item.name}</TableCell>
+                    <TableCell>{item.sku}</TableCell>
+                    <TableCell>{item.quantity} шт</TableCell>
+                    <TableCell>{item.batch}</TableCell>
+                    <TableCell>{item.price.toLocaleString()} ₽</TableCell>
+                    <TableCell>
+                      <Badge
+                        variant={
+                          item.quantity < item.minStock / 2
+                            ? "destructive"
+                            : item.quantity < item.minStock
+                            ? "default"
+                            : "secondary"
+                        }
+                      >
+                        {item.status}
+                      </Badge>
+                    </TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={6} className="text-center text-muted-foreground">
+                    Нет товаров. Добавьте первый товар через кнопку "Добавить товар"
                   </TableCell>
                 </TableRow>
-              ))}
+              )}
             </TableBody>
           </Table>
         </Card>
@@ -270,31 +404,37 @@ export function StockTabs({ stockData, recentMovements, chartData, categoryData,
         <Card className="p-6">
           <h3 className="text-lg font-semibold mb-4">История операций</h3>
           <div className="space-y-4">
-            {recentMovements.map((movement, idx) => (
-              <div key={idx} className="flex items-center justify-between p-4 border rounded-lg hover-scale">
-                <div className="flex items-center gap-4">
-                  <div className={`h-10 w-10 rounded-lg flex items-center justify-center ${
-                    movement.type === "Поступление" ? "bg-secondary/10" : "bg-destructive/10"
-                  }`}>
-                    <Icon 
-                      name={movement.type === "Поступление" ? "ArrowDown" : "ArrowUp"} 
-                      size={20} 
-                      className={movement.type === "Поступление" ? "text-secondary" : "text-destructive"}
-                    />
+            {recentMovements.length > 0 ? (
+              recentMovements.map((movement, idx) => (
+                <div key={idx} className="flex items-center justify-between p-4 border rounded-lg hover-scale">
+                  <div className="flex items-center gap-4">
+                    <div className={`h-10 w-10 rounded-lg flex items-center justify-center ${
+                      movement.type === "Поступление" ? "bg-secondary/10" : "bg-destructive/10"
+                    }`}>
+                      <Icon 
+                        name={movement.type === "Поступление" ? "ArrowDown" : "ArrowUp"} 
+                        size={20} 
+                        className={movement.type === "Поступление" ? "text-secondary" : "text-destructive"}
+                      />
+                    </div>
+                    <div>
+                      <p className="font-medium">{movement.product}</p>
+                      <p className="text-sm text-muted-foreground">{movement.user} • {movement.date}</p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="font-medium">{movement.product}</p>
-                    <p className="text-sm text-muted-foreground">{movement.user} • {movement.date}</p>
+                  <div className="text-right">
+                    <p className={`font-semibold ${movement.quantity > 0 ? "text-secondary" : "text-destructive"}`}>
+                      {movement.quantity > 0 ? "+" : ""}{movement.quantity} шт
+                    </p>
+                    <Badge variant="outline">{movement.type}</Badge>
                   </div>
                 </div>
-                <div className="text-right">
-                  <p className={`font-semibold ${movement.quantity > 0 ? "text-secondary" : "text-destructive"}`}>
-                    {movement.quantity > 0 ? "+" : ""}{movement.quantity} шт
-                  </p>
-                  <Badge variant="outline">{movement.type}</Badge>
-                </div>
+              ))
+            ) : (
+              <div className="text-center py-8 text-muted-foreground">
+                Нет операций
               </div>
-            ))}
+            )}
           </div>
         </Card>
       </TabsContent>
