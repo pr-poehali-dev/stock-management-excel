@@ -9,6 +9,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import LoginPage from "@/components/LoginPage";
 import { StatsCards } from "@/components/StatsCards";
 import { StockTabs } from "@/components/StockTabs";
+import { Reports } from "@/components/Reports";
+import { WriteOffAct } from "@/components/WriteOffAct";
 import { useToast } from "@/hooks/use-toast";
 
 const STOCK_API = 'https://functions.poehali.dev/854afd98-2bf3-4236-b8b0-7995df44c841';
@@ -239,7 +241,7 @@ const Index = () => {
         <StatsCards stockData={stockData} />
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-6">
+          <TabsList className="grid w-full grid-cols-8">
             <TabsTrigger value="dashboard" className="gap-2">
               <Icon name="LayoutDashboard" size={16} />
               Дашборд
@@ -260,6 +262,14 @@ const Index = () => {
               <Icon name="History" size={16} />
               История
             </TabsTrigger>
+            <TabsTrigger value="reports" className="gap-2">
+              <Icon name="BarChart3" size={16} />
+              Отчёты
+            </TabsTrigger>
+            <TabsTrigger value="writeoff" className="gap-2" disabled={!isAdmin}>
+              <Icon name="FileText" size={16} />
+              Акты
+            </TabsTrigger>
             {isAdmin && (
               <TabsTrigger value="users" className="gap-2">
                 <Icon name="Users" size={16} />
@@ -276,6 +286,9 @@ const Index = () => {
             isAdmin={isAdmin}
             onDataUpdate={loadData}
           />
+          
+          {activeTab === "reports" && <Reports stockData={stockData} />}
+          {activeTab === "writeoff" && isAdmin && <WriteOffAct stockData={stockData} />}
         </Tabs>
       </div>
     </div>
