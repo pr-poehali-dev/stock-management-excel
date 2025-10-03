@@ -16,6 +16,7 @@ import { useToast } from "@/hooks/use-toast";
 
 const STOCK_API = 'https://functions.poehali.dev/854afd98-2bf3-4236-b8b0-7995df44c841';
 const MOVEMENTS_API = 'https://functions.poehali.dev/178c4661-b69a-4921-8960-35d7db62c2d5';
+const EXPORT_API = 'https://functions.poehali.dev/48cb185d-5567-489a-8908-5e8bc392080f';
 
 const Index = () => {
   const { isAuthenticated, user, logout, isAdmin } = useAuth();
@@ -110,6 +111,41 @@ const Index = () => {
     }
   };
 
+  const handleExportExcel = async () => {
+    try {
+      const response = await fetch(EXPORT_API);
+      
+      if (response.ok) {
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'stock_products.xlsx';
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+        
+        toast({
+          title: "Excel файл скачан",
+          description: "Данные успешно экспортированы"
+        });
+      } else {
+        toast({
+          title: "Ошибка",
+          description: "Не удалось экспортировать данные",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Ошибка",
+        description: "Ошибка при экспорте данных",
+        variant: "destructive"
+      });
+    }
+  };
+
   if (!isAuthenticated) {
     return <LoginPage />;
   }
@@ -164,7 +200,11 @@ const Index = () => {
           </div>
         </div>
 
-        <div className="flex items-center justify-end mb-4">
+        <div className="flex items-center justify-end mb-4 gap-3">
+          <Button size="lg" className="gap-2" variant="outline" onClick={handleExportExcel}>
+            <Icon name="Download" size={20} />
+            Скачать Excel
+          </Button>
           <Dialog open={newProductOpen} onOpenChange={setNewProductOpen}>
             <DialogTrigger asChild>
               <Button size="lg" className="gap-2" disabled={!isAdmin}>

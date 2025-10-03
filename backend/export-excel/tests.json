@@ -1,0 +1,19 @@
+{
+  "tests": [
+    {
+      "name": "Export Excel file",
+      "method": "GET",
+      "path": "/",
+      "expectedStatus": 200,
+      "expectedHeaders": {
+        "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+      }
+    },
+    {
+      "name": "Handle OPTIONS request",
+      "method": "OPTIONS",
+      "path": "/",
+      "expectedStatus": 200
+    }
+  ]
+}
