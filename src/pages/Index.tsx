@@ -10,9 +10,16 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import Icon from "@/components/ui/icon";
 import { Badge } from "@/components/ui/badge";
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
+import { useAuth } from "@/contexts/AuthContext";
+import LoginPage from "@/components/LoginPage";
 
 const Index = () => {
+  const { isAuthenticated, user, logout, isAdmin } = useAuth();
   const [activeTab, setActiveTab] = useState("dashboard");
+
+  if (!isAuthenticated) {
+    return <LoginPage />;
+  }
 
   const stockData = [
     { name: "Ноутбук Dell XPS 15", sku: "LT-001", quantity: 45, minStock: 20, price: 89900, batch: "2024-09", status: "В наличии" },
@@ -55,9 +62,25 @@ const Index = () => {
             <h1 className="text-4xl font-bold tracking-tight">Складской учёт</h1>
             <p className="text-muted-foreground mt-2">Система управления складом и товарами</p>
           </div>
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3 px-4 py-2 bg-muted rounded-lg">
+              <Icon name={isAdmin ? "Shield" : "User"} size={20} className={isAdmin ? "text-primary" : "text-blue-600"} />
+              <div>
+                <div className="text-sm font-medium">{user?.name}</div>
+                <div className="text-xs text-muted-foreground">{isAdmin ? "Администратор" : "Пользователь"}</div>
+              </div>
+            </div>
+            <Button variant="outline" onClick={logout} className="gap-2">
+              <Icon name="LogOut" size={18} />
+              Выход
+            </Button>
+          </div>
+        </div>
+
+        <div className="flex items-center justify-end mb-4">
           <Dialog>
             <DialogTrigger asChild>
-              <Button size="lg" className="gap-2">
+              <Button size="lg" className="gap-2" disabled={!isAdmin}>
                 <Icon name="Plus" size={20} />
                 Добавить товар
               </Button>
@@ -145,11 +168,11 @@ const Index = () => {
               <Icon name="LayoutDashboard" size={16} />
               Дашборд
             </TabsTrigger>
-            <TabsTrigger value="incoming" className="gap-2">
+            <TabsTrigger value="incoming" className="gap-2" disabled={!isAdmin}>
               <Icon name="PackagePlus" size={16} />
               Поступление
             </TabsTrigger>
-            <TabsTrigger value="outgoing" className="gap-2">
+            <TabsTrigger value="outgoing" className="gap-2" disabled={!isAdmin}>
               <Icon name="PackageMinus" size={16} />
               Списание
             </TabsTrigger>
