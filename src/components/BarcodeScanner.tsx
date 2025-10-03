@@ -25,11 +25,22 @@ interface ScannedItem {
   timestamp: Date;
 }
 
+interface BarcodeSearchResult {
+  barcode: string;
+  name?: string;
+  brand?: string;
+  category?: string;
+  description?: string;
+  image?: string;
+}
+
 export function BarcodeScanner({ stockData, onScan }: BarcodeScannerProps) {
   const { toast } = useToast();
   const [barcode, setBarcode] = useState('');
   const [scannedItems, setScannedItems] = useState<ScannedItem[]>([]);
   const [isScanning, setIsScanning] = useState(false);
+  const [searchResult, setSearchResult] = useState<BarcodeSearchResult | null>(null);
+  const [isSearching, setIsSearching] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const scanBuffer = useRef('');
   const scanTimeout = useRef<NodeJS.Timeout | null>(null);
@@ -55,6 +66,37 @@ export function BarcodeScanner({ stockData, onScan }: BarcodeScannerProps) {
       oscillator.stop(audioContext.currentTime + 0.15);
     } catch (error) {
       console.log('Audio not supported');
+    }
+  };
+
+  const searchBarcodeOnline = async (barcode: string): Promise<BarcodeSearchResult | null> => {
+    setIsSearching(true);
+    try {
+      // Используем Open Food Facts API для поиска товаров
+      const response = await fetch(`https://world.openfoodfacts.org/api/v0/product/${barcode}.json`);
+      const data = await response.json();
+      
+      if (data.status === 1 && data.product) {
+        const product = data.product;
+        return {
+          barcode: barcode,
+          name: product.product_name || product.product_name_ru || 'Товар не определён',
+          brand: product.brands || '',
+          category: product.categories || '',
+          description: product.generic_name || product.generic_name_ru || '',
+          image: product.image_url || product.image_front_url || ''
+        };
+      }
+      
+      // Альтернативный поиск через UPCitemdb (если нужен ключ API)
+      // const upcResponse = await fetch(`https://api.upcitemdb.com/prod/trial/lookup?upc=${barcode}`);
+      
+      return null;
+    } catch (error) {
+      console.error('Barcode search error:', error);
+      return null;
+    } finally {
+      setIsSearching(false);
     }
   };
 
@@ -89,15 +131,32 @@ export function BarcodeScanner({ stockData, onScan }: BarcodeScannerProps) {
     };
   }, [isScanning, stockData]);
 
-  const handleScan = (scannedBarcode: string) => {
+  const handleScan = async (scannedBarcode: string) => {
     const product = stockData.find(item => item.sku === scannedBarcode);
     
     if (!product) {
+      // Если товар не найден в базе, ищем в интернете
       toast({
-        title: "Товар не найден",
-        description: `Штрих-код ${scannedBarcode} не найден в базе`,
-        variant: "destructive"
+        title: "Поиск товара...",
+        description: `Ищу информацию о штрих-коде ${scannedBarcode} в интернете`,
       });
+      
+      const result = await searchBarcodeOnline(scannedBarcode);
+      
+      if (result) {
+        setSearchResult(result);
+        toast({
+          title: "Товар найден!",
+          description: `${result.name}${result.brand ? ` (${result.brand})` : ''}`,
+        });
+      } else {
+        setSearchResult(null);
+        toast({
+          title: "Товар не найден",
+          description: `Штрих-код ${scannedBarcode} не найден ни в базе, ни в интернете`,
+          variant: "destructive"
+        });
+      }
       return;
     }
 
@@ -222,6 +281,56 @@ export function BarcodeScanner({ stockData, onScan }: BarcodeScannerProps) {
             </Button>
           </div>
         </div>
+
+        {isSearching && (
+          <div className="flex items-center gap-2 p-3 bg-blue-50 dark:bg-blue-950/20 rounded-lg">
+            <div className="animate-spin">
+              <Icon name="Loader2" className="text-blue-600" size={20} />
+            </div>
+            <span className="text-sm text-blue-600 dark:text-blue-400">Поиск товара в интернете...</span>
+          </div>
+        )}
+
+        {searchResult && (
+          <div className="p-4 border-2 border-blue-500 rounded-lg bg-blue-50 dark:bg-blue-950/20">
+            <div className="flex gap-4">
+              {searchResult.image && (
+                <img 
+                  src={searchResult.image} 
+                  alt={searchResult.name} 
+                  className="w-20 h-20 object-cover rounded-lg"
+                />
+              )}
+              <div className="flex-1">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <h4 className="font-semibold text-blue-900 dark:text-blue-100">{searchResult.name}</h4>
+                    {searchResult.brand && (
+                      <p className="text-sm text-blue-700 dark:text-blue-300">Бренд: {searchResult.brand}</p>
+                    )}
+                    {searchResult.category && (
+                      <p className="text-sm text-blue-600 dark:text-blue-400">Категория: {searchResult.category}</p>
+                    )}
+                    {searchResult.description && (
+                      <p className="text-sm text-muted-foreground mt-1">{searchResult.description}</p>
+                    )}
+                    <p className="text-xs text-muted-foreground mt-2">Штрих-код: {searchResult.barcode}</p>
+                  </div>
+                  <Button 
+                    variant="ghost" 
+                    size="icon"
+                    onClick={() => setSearchResult(null)}
+                  >
+                    <Icon name="X" size={16} />
+                  </Button>
+                </div>
+                <div className="mt-3 text-sm text-blue-700 dark:text-blue-300">
+                  💡 Товар найден в Open Food Facts. Добавьте его в базу данных для дальнейшего использования.
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {scannedItems.length > 0 && (
           <div className="flex items-center justify-between p-3 bg-secondary/10 rounded-lg">
