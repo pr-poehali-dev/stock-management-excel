@@ -11,6 +11,7 @@ import { StatsCards } from "@/components/StatsCards";
 import { StockTabs } from "@/components/StockTabs";
 import { Reports } from "@/components/Reports";
 import { WriteOffAct } from "@/components/WriteOffAct";
+import { NotificationCenter, StockAlerts } from "@/components/NotificationCenter";
 import { useToast } from "@/hooks/use-toast";
 
 const STOCK_API = 'https://functions.poehali.dev/854afd98-2bf3-4236-b8b0-7995df44c841';
@@ -148,6 +149,7 @@ const Index = () => {
             <p className="text-muted-foreground mt-2">Система управления складом и товарами</p>
           </div>
           <div className="flex items-center gap-4">
+            <NotificationCenter stockData={stockData} />
             <div className="flex items-center gap-3 px-4 py-2 bg-muted rounded-lg">
               <Icon name={isAdmin ? "Shield" : "User"} size={20} className={isAdmin ? "text-primary" : "text-blue-600"} />
               <div>
@@ -239,6 +241,8 @@ const Index = () => {
         </div>
 
         <StatsCards stockData={stockData} />
+
+        <StockAlerts stockData={stockData} />
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList className="grid w-full grid-cols-8">
