@@ -14,7 +14,7 @@ import { WriteOffAct } from "@/components/WriteOffAct";
 import { NotificationCenter, StockAlerts } from "@/components/NotificationCenter";
 import { useToast } from "@/hooks/use-toast";
 import { useOfflineStorage } from "@/hooks/useOfflineStorage";
-import { InstallButton } from "@/components/InstallButton";
+
 
 const STOCK_API = 'https://functions.poehali.dev/854afd98-2bf3-4236-b8b0-7995df44c841';
 const MOVEMENTS_API = 'https://functions.poehali.dev/178c4661-b69a-4921-8960-35d7db62c2d5';
@@ -272,7 +272,6 @@ const Index = () => {
             </p>
           </div>
           <div className="flex items-center gap-4">
-            <InstallButton />
             <NotificationCenter stockData={stockData} />
             <div className="flex items-center gap-3 px-4 py-2 bg-muted rounded-lg">
               <Icon name={isAdmin ? "Shield" : "User"} size={20} className={isAdmin ? "text-primary" : "text-blue-600"} />
