@@ -186,6 +186,7 @@ const Index = () => {
     }
 
     try {
+      setLoading(true);
       const reader = new FileReader();
       reader.onload = async (e) => {
         const base64 = e.target?.result as string;
@@ -199,13 +200,16 @@ const Index = () => {
         
         if (response.ok) {
           const result = await response.json();
-          toast({
-            title: "Импорт завершен",
-            description: `Добавлено: ${result.inserted}, Обновлено: ${result.updated}`
-          });
+          
           setImportOpen(false);
           setSelectedFile(null);
-          loadData();
+          
+          await loadData();
+          
+          toast({
+            title: "Импорт завершен",
+            description: `Добавлено: ${result.inserted}, Обновлено: ${result.updated}. База данных обновлена!`
+          });
         } else {
           const error = await response.json();
           toast({
@@ -214,9 +218,11 @@ const Index = () => {
             variant: "destructive"
           });
         }
+        setLoading(false);
       };
       reader.readAsDataURL(selectedFile);
     } catch (error) {
+      setLoading(false);
       toast({
         title: "Ошибка",
         description: "Ошибка при импорте данных",
