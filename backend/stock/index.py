@@ -61,32 +61,63 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             body = json.loads(event.get('body', '{}'))
             name = body.get('name')
             inventory_number = body.get('inventory_number')
-            quantity = body.get('quantity', 0)
-            min_stock = body.get('min_stock', 0)
-            price = body.get('price')
+            quantity = int(body.get('quantity', 0))
+            min_stock = int(body.get('min_stock', 0))
+            price = float(body.get('price', 0))
             batch = body.get('batch', '')
             
-            with conn.cursor(cursor_factory=RealDictCursor) as cur:
-                cur.execute('''
-                    INSERT INTO products (name, inventory_number, quantity, min_stock, price, batch)
-                    VALUES (%s, %s, %s, %s, %s, %s)
-                    RETURNING id, name, inventory_number, quantity, min_stock, price, batch, created_at
-                ''', (name, inventory_number, quantity, min_stock, price, batch))
-                
-                product = cur.fetchone()
-                product['price'] = float(product['price'])
-                if product['created_at']:
-                    product['created_at'] = product['created_at'].isoformat()
-                
-                conn.commit()
-                
+            if not name or not inventory_number:
                 return {
-                    'statusCode': 201,
+                    'statusCode': 400,
                     'headers': {
                         'Content-Type': 'application/json',
                         'Access-Control-Allow-Origin': '*'
                     },
-                    'body': json.dumps({'product': product}),
+                    'body': json.dumps({'error': 'Заполните название и инвентарный номер'}),
+                    'isBase64Encoded': False
+                }
+            
+            try:
+                with conn.cursor(cursor_factory=RealDictCursor) as cur:
+                    cur.execute(
+                        "INSERT INTO products (name, inventory_number, quantity, min_stock, price, batch) VALUES ('" + 
+                        str(name).replace("'", "''") + "', '" + 
+                        str(inventory_number).replace("'", "''") + "', " + 
+                        str(quantity) + ", " + 
+                        str(min_stock) + ", " + 
+                        str(price) + ", '" + 
+                        str(batch).replace("'", "''") + "') " +
+                        "RETURNING id, name, inventory_number, quantity, min_stock, price, batch, created_at"
+                    )
+                    
+                    product = cur.fetchone()
+                    product['price'] = float(product['price'])
+                    if product['created_at']:
+                        product['created_at'] = product['created_at'].isoformat()
+                    
+                    conn.commit()
+                    
+                    return {
+                        'statusCode': 201,
+                        'headers': {
+                            'Content-Type': 'application/json',
+                            'Access-Control-Allow-Origin': '*'
+                        },
+                        'body': json.dumps({'product': product}),
+                        'isBase64Encoded': False
+                    }
+            except psycopg2.IntegrityError as e:
+                conn.rollback()
+                error_msg = 'Товар с таким инвентарным номером уже существует'
+                if 'unique' in str(e).lower():
+                    error_msg = 'Товар с таким инвентарным номером уже существует'
+                return {
+                    'statusCode': 400,
+                    'headers': {
+                        'Content-Type': 'application/json',
+                        'Access-Control-Allow-Origin': '*'
+                    },
+                    'body': json.dumps({'error': error_msg}),
                     'isBase64Encoded': False
                 }
         
