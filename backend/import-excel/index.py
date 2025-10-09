@@ -102,27 +102,29 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         updated = 0
         
         for product in products:
-            cursor.execute("""
-                SELECT id FROM t_p72161094_stock_management_exc.products WHERE inventory_number = %s
-            """, (product['inventory_number'],))
+            safe_inv = str(product['inventory_number']).replace("'", "''")
+            safe_name = str(product['name']).replace("'", "''")
+            safe_batch = str(product['batch']).replace("'", "''")
+            
+            cursor.execute(
+                f"SELECT id FROM products WHERE inventory_number = '{safe_inv}'"
+            )
             
             existing = cursor.fetchone()
             
             if existing:
-                cursor.execute("""
-                    UPDATE t_p72161094_stock_management_exc.products
-                    SET name = %s, quantity = %s, min_stock = %s, price = %s, batch = %s, updated_at = NOW()
-                    WHERE inventory_number = %s
-                """, (product['name'], product['quantity'], product['min_stock'], 
-                      product['price'], product['batch'], product['inventory_number']))
+                cursor.execute(
+                    f"UPDATE products SET name = '{safe_name}', quantity = {product['quantity']}, " +
+                    f"min_stock = {product['min_stock']}, price = {product['price']}, " +
+                    f"batch = '{safe_batch}', updated_at = NOW() WHERE inventory_number = '{safe_inv}'"
+                )
                 updated += 1
             else:
-                cursor.execute("""
-                    INSERT INTO t_p72161094_stock_management_exc.products 
-                    (name, inventory_number, quantity, min_stock, price, batch)
-                    VALUES (%s, %s, %s, %s, %s, %s)
-                """, (product['name'], product['inventory_number'], product['quantity'], 
-                      product['min_stock'], product['price'], product['batch']))
+                cursor.execute(
+                    f"INSERT INTO products (name, inventory_number, quantity, min_stock, price, batch) " +
+                    f"VALUES ('{safe_name}', '{safe_inv}', {product['quantity']}, " +
+                    f"{product['min_stock']}, {product['price']}, '{safe_batch}')"
+                )
                 inserted += 1
         
         conn.commit()
