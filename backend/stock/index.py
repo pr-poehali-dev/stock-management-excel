@@ -127,11 +127,9 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             quantity = body.get('quantity')
             
             with conn.cursor() as cur:
-                cur.execute('''
-                    UPDATE products 
-                    SET quantity = %s, updated_at = CURRENT_TIMESTAMP
-                    WHERE id = %s
-                ''', (quantity, product_id))
+                cur.execute(
+                    f"UPDATE products SET quantity = {int(quantity)}, updated_at = CURRENT_TIMESTAMP WHERE id = {int(product_id)}"
+                )
                 
                 conn.commit()
                 

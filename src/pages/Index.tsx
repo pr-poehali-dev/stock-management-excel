@@ -201,15 +201,16 @@ const Index = () => {
         if (response.ok) {
           const result = await response.json();
           
-          setImportOpen(false);
-          setSelectedFile(null);
-          
-          await loadData();
-          
           toast({
             title: "Импорт завершен",
-            description: `Добавлено: ${result.inserted}, Обновлено: ${result.updated}. База данных обновлена!`
+            description: `Добавлено: ${result.inserted}, Обновлено: ${result.updated}`
           });
+          
+          setImportOpen(false);
+          setSelectedFile(null);
+          setLoading(false);
+          
+          await loadData();
         } else {
           const error = await response.json();
           toast({
