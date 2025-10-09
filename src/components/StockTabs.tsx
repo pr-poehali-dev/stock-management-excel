@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import Icon from "@/components/ui/icon";
 import { Badge } from "@/components/ui/badge";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
+
 import { UserAddDialog, UsersTable } from "./UserManagement";
 import { BarcodeScanner } from "./BarcodeScanner";
 import { useAuth } from "@/contexts/AuthContext";
@@ -191,86 +191,7 @@ export function StockTabs({ stockData, recentMovements, chartData, categoryData,
 
   return (
     <>
-      <TabsContent value="dashboard" className="space-y-6 animate-fade-in">
-        <div className="grid gap-6 lg:grid-cols-2">
-          <Card className="p-6">
-            <h3 className="text-lg font-semibold mb-4">Движение товаров</h3>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={chartData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="month" />
-                <YAxis />
-                <Tooltip />
-                <Bar dataKey="incoming" fill="#10B981" name="Поступление" />
-                <Bar dataKey="outgoing" fill="#EF4444" name="Списание" />
-              </BarChart>
-            </ResponsiveContainer>
-          </Card>
 
-          <Card className="p-6">
-            <h3 className="text-lg font-semibold mb-4">Распределение по категориям</h3>
-            <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
-                <Pie
-                  data={categoryData}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={false}
-                  label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                  outerRadius={100}
-                  fill="#8884d8"
-                  dataKey="value"
-                >
-                  {categoryData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
-                </Pie>
-                <Tooltip />
-              </PieChart>
-            </ResponsiveContainer>
-          </Card>
-        </div>
-
-        <Card className="p-6">
-          <h3 className="text-lg font-semibold mb-4">Последние операции</h3>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Дата</TableHead>
-                <TableHead>Товар</TableHead>
-                <TableHead>Тип операции</TableHead>
-                <TableHead>Количество</TableHead>
-                <TableHead>Пользователь</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {recentMovements.length > 0 ? (
-                recentMovements.map((movement, idx) => (
-                  <TableRow key={idx}>
-                    <TableCell>{movement.date}</TableCell>
-                    <TableCell className="font-medium">{movement.product}</TableCell>
-                    <TableCell>
-                      <Badge variant={movement.type === "Поступление" ? "default" : "destructive"}>
-                        {movement.type}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className={movement.quantity > 0 ? "text-secondary" : "text-destructive"}>
-                      {movement.quantity > 0 ? "+" : ""}{movement.quantity}
-                    </TableCell>
-                    <TableCell>{movement.user}</TableCell>
-                  </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell colSpan={5} className="text-center text-muted-foreground">
-                    Нет операций
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </Card>
-      </TabsContent>
 
       <TabsContent value="incoming" className="space-y-6 animate-fade-in">
         <BarcodeScanner stockData={stockData} onScan={handleBarcodeIncoming} />
@@ -375,96 +296,94 @@ export function StockTabs({ stockData, recentMovements, chartData, categoryData,
         </Card>
       </TabsContent>
 
-      <TabsContent value="stock" className="space-y-6 animate-fade-in">
-        <Card className="p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold">Остатки товаров</h3>
-            <Input placeholder="Поиск по названию или инвентарному номеру" className="max-w-xs" />
-          </div>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Название</TableHead>
-                <TableHead>Инвентарный номер</TableHead>
-                <TableHead>Количество</TableHead>
-                <TableHead>Партия</TableHead>
-                <TableHead>Цена</TableHead>
-                <TableHead>Статус</TableHead>
+      <TabsContent value="stock" className="animate-fade-in">
+        <div className="overflow-x-auto border">
+          <Table className="bg-white">
+            <TableHeader className="bg-[#217346] text-white">
+              <TableRow className="border-b border-gray-400 hover:bg-[#217346]">
+                <TableHead className="text-white font-semibold border-r border-gray-400">Название</TableHead>
+                <TableHead className="text-white font-semibold border-r border-gray-400">Инвентарный номер</TableHead>
+                <TableHead className="text-white font-semibold border-r border-gray-400 text-right">Количество</TableHead>
+                <TableHead className="text-white font-semibold border-r border-gray-400">Партия</TableHead>
+                <TableHead className="text-white font-semibold border-r border-gray-400 text-right">Цена</TableHead>
+                <TableHead className="text-white font-semibold">Статус</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {stockData.length > 0 ? (
-                stockData.map((item) => (
-                  <TableRow key={item.inventory_number}>
-                    <TableCell className="font-medium">{item.name}</TableCell>
-                    <TableCell>{item.inventory_number}</TableCell>
-                    <TableCell>{item.quantity} шт</TableCell>
-                    <TableCell>{item.batch}</TableCell>
-                    <TableCell>{item.price.toLocaleString()} ₽</TableCell>
+                stockData.map((item, idx) => (
+                  <TableRow key={item.inventory_number} className={`border-b hover:bg-gray-50 ${idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
+                    <TableCell className="border-r border-gray-300 font-medium">{item.name}</TableCell>
+                    <TableCell className="border-r border-gray-300">{item.inventory_number}</TableCell>
+                    <TableCell className="border-r border-gray-300 text-right">{item.quantity}</TableCell>
+                    <TableCell className="border-r border-gray-300">{item.batch}</TableCell>
+                    <TableCell className="border-r border-gray-300 text-right">{item.price.toLocaleString()} ₽</TableCell>
                     <TableCell>
-                      <Badge
-                        variant={
-                          item.quantity < item.minStock / 2
-                            ? "destructive"
-                            : item.quantity < item.minStock
-                            ? "default"
-                            : "secondary"
-                        }
-                      >
+                      <span className={`px-2 py-1 text-xs ${
+                        item.quantity < item.minStock / 2
+                          ? "bg-red-100 text-red-800"
+                          : item.quantity < item.minStock
+                          ? "bg-yellow-100 text-yellow-800"
+                          : "bg-green-100 text-green-800"
+                      }`}>
                         {item.status}
-                      </Badge>
+                      </span>
                     </TableCell>
                   </TableRow>
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center text-muted-foreground">
-                    Нет товаров. Добавьте первый товар через кнопку "Добавить товар"
+                  <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
+                    Нет товаров. Добавьте первый товар через кнопку "Добавить"
                   </TableCell>
                 </TableRow>
               )}
             </TableBody>
           </Table>
-        </Card>
+        </div>
       </TabsContent>
 
-      <TabsContent value="history" className="space-y-6 animate-fade-in">
-        <Card className="p-6">
-          <h3 className="text-lg font-semibold mb-4">История операций</h3>
-          <div className="space-y-4">
-            {recentMovements.length > 0 ? (
-              recentMovements.map((movement, idx) => (
-                <div key={idx} className="flex items-center justify-between p-4 border rounded-lg hover-scale">
-                  <div className="flex items-center gap-4">
-                    <div className={`h-10 w-10 rounded-lg flex items-center justify-center ${
-                      movement.type === "Поступление" ? "bg-secondary/10" : "bg-destructive/10"
-                    }`}>
-                      <Icon 
-                        name={movement.type === "Поступление" ? "ArrowDown" : "ArrowUp"} 
-                        size={20} 
-                        className={movement.type === "Поступление" ? "text-secondary" : "text-destructive"}
-                      />
-                    </div>
-                    <div>
-                      <p className="font-medium">{movement.product}</p>
-                      <p className="text-sm text-muted-foreground">{movement.user} • {movement.date}</p>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <p className={`font-semibold ${movement.quantity > 0 ? "text-secondary" : "text-destructive"}`}>
-                      {movement.quantity > 0 ? "+" : ""}{movement.quantity} шт
-                    </p>
-                    <Badge variant="outline">{movement.type}</Badge>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <div className="text-center py-8 text-muted-foreground">
-                Нет операций
-              </div>
-            )}
-          </div>
-        </Card>
+      <TabsContent value="history" className="animate-fade-in">
+        <div className="overflow-x-auto border">
+          <Table className="bg-white">
+            <TableHeader className="bg-[#217346] text-white">
+              <TableRow className="border-b border-gray-400 hover:bg-[#217346]">
+                <TableHead className="text-white font-semibold border-r border-gray-400">Дата</TableHead>
+                <TableHead className="text-white font-semibold border-r border-gray-400">Товар</TableHead>
+                <TableHead className="text-white font-semibold border-r border-gray-400">Тип операции</TableHead>
+                <TableHead className="text-white font-semibold border-r border-gray-400 text-right">Количество</TableHead>
+                <TableHead className="text-white font-semibold">Пользователь</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {recentMovements.length > 0 ? (
+                recentMovements.map((movement, idx) => (
+                  <TableRow key={idx} className={`border-b hover:bg-gray-50 ${idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
+                    <TableCell className="border-r border-gray-300">{movement.date}</TableCell>
+                    <TableCell className="border-r border-gray-300 font-medium">{movement.product}</TableCell>
+                    <TableCell className="border-r border-gray-300">
+                      <span className={`px-2 py-1 text-xs ${
+                        movement.type === "Поступление" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
+                      }`}>
+                        {movement.type}
+                      </span>
+                    </TableCell>
+                    <TableCell className={`border-r border-gray-300 text-right font-medium ${movement.quantity > 0 ? "text-green-600" : "text-red-600"}`}>
+                      {movement.quantity > 0 ? "+" : ""}{movement.quantity}
+                    </TableCell>
+                    <TableCell>{movement.user}</TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
+                    Нет операций
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </div>
       </TabsContent>
 
       {isAdmin && (
