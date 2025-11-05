@@ -6,7 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import Icon from "@/components/ui/icon";
 import { ActItem, ActData, StockItem } from "./types";
-import { useState } from "react";
+import { CommissionTemplates } from "./CommissionTemplates";
 
 interface ActFormProps {
   actData: ActData;
@@ -62,7 +62,14 @@ export function ActForm({
           />
         </div>
         <div className="md:col-span-2">
-          <Label>Комиссия по списанию</Label>
+          <CommissionTemplates 
+            onApplyTemplate={(members) => {
+              onActDataChange({ ...actData, commissionMembers: members });
+            }}
+          />
+        </div>
+        <div className="md:col-span-2">
+          <Label>Члены комиссии</Label>
           <div className="space-y-2 mt-2">
             {actData.commissionMembers.map((member, idx) => (
               <div key={idx} className="flex gap-2">
