@@ -1,4 +1,5 @@
 {
+  "clear-database": "https://functions.poehali.dev/bab0feeb-2c4b-43b9-ba7b-e35e1cf7d977",
   "import-excel": "https://functions.poehali.dev/1c73e0e3-b0c0-4736-9352-752eb1a20a78",
   "export-excel": "https://functions.poehali.dev/48cb185d-5567-489a-8908-5e8bc392080f",
   "stock": "https://functions.poehali.dev/854afd98-2bf3-4236-b8b0-7995df44c841",

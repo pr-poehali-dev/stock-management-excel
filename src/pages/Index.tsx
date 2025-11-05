@@ -20,6 +20,7 @@ const STOCK_API = 'https://functions.poehali.dev/854afd98-2bf3-4236-b8b0-7995df4
 const MOVEMENTS_API = 'https://functions.poehali.dev/178c4661-b69a-4921-8960-35d7db62c2d5';
 const EXPORT_API = 'https://functions.poehali.dev/48cb185d-5567-489a-8908-5e8bc392080f';
 const IMPORT_API = 'https://functions.poehali.dev/1c73e0e3-b0c0-4736-9352-752eb1a20a78';
+const CLEAR_DB_API = 'https://functions.poehali.dev/bab0feeb-2c4b-43b9-ba7b-e35e1cf7d977';
 
 const Index = () => {
   const { isAuthenticated, user, logout, isAdmin } = useAuth();
@@ -232,6 +233,46 @@ const Index = () => {
     }
   };
 
+  const handleClearDatabase = async () => {
+    if (!window.confirm('Вы уверены, что хотите удалить все товары и движения из базы данных? Это действие нельзя отменить!')) {
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const response = await fetch(CLEAR_DB_API, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      
+      if (response.ok) {
+        const result = await response.json();
+        
+        toast({
+          title: "База данных очищена",
+          description: `Удалено товаров: ${result.products_deleted}, движений: ${result.movements_deleted}`
+        });
+        
+        await loadData();
+      } else {
+        const error = await response.json();
+        toast({
+          title: "Ошибка очистки",
+          description: error.error || "Не удалось очистить базу данных",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Ошибка",
+        description: "Ошибка при очистке базы данных",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   if (!isAuthenticated) {
     return <LoginPage />;
   }
@@ -322,6 +363,17 @@ const Index = () => {
               </div>
             </DialogContent>
           </Dialog>
+          {isAdmin && (
+            <Button 
+              size="sm" 
+              variant="ghost" 
+              className="gap-2 text-sm font-normal text-destructive hover:text-destructive hover:bg-destructive/10" 
+              onClick={handleClearDatabase}
+            >
+              <Icon name="Trash2" size={16} />
+              Очистить базу
+            </Button>
+          )}
           <Dialog open={newProductOpen} onOpenChange={setNewProductOpen}>
             <DialogTrigger asChild>
               <Button size="sm" variant="ghost" className="gap-2 text-sm font-normal" disabled={!isAdmin}>
