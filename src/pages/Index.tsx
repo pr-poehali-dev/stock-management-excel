@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import Icon from "@/components/ui/icon";
 import { useAuth } from "@/contexts/AuthContext";
 import LoginPage from "@/components/LoginPage";
@@ -38,7 +39,8 @@ const Index = () => {
     quantity: 0,
     min_stock: 0,
     price: 0,
-    batch: ''
+    batch: '',
+    unit: 'шт'
   });
   const { toast } = useToast();
 
@@ -124,7 +126,7 @@ const Index = () => {
           description: `${newProduct.name} успешно добавлен в систему`
         });
         setNewProductOpen(false);
-        setNewProduct({ name: '', inventory_number: '', quantity: 0, min_stock: 0, price: 0, batch: '' });
+        setNewProduct({ name: '', inventory_number: '', quantity: 0, min_stock: 0, price: 0, batch: '', unit: 'шт' });
         loadData();
       } else {
         toast({
@@ -443,6 +445,30 @@ const Index = () => {
                     value={newProduct.batch}
                     onChange={(e) => setNewProduct({ ...newProduct, batch: e.target.value })}
                   />
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="unit" className="text-right">Ед. измерения</Label>
+                  <Select 
+                    value={newProduct.unit} 
+                    onValueChange={(val) => setNewProduct({ ...newProduct, unit: val })}
+                  >
+                    <SelectTrigger className="col-span-3">
+                      <SelectValue placeholder="Выберите единицу" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="шт">шт (штуки)</SelectItem>
+                      <SelectItem value="кг">кг (килограммы)</SelectItem>
+                      <SelectItem value="г">г (граммы)</SelectItem>
+                      <SelectItem value="л">л (литры)</SelectItem>
+                      <SelectItem value="мл">мл (миллилитры)</SelectItem>
+                      <SelectItem value="м">м (метры)</SelectItem>
+                      <SelectItem value="см">см (сантиметры)</SelectItem>
+                      <SelectItem value="м²">м² (квадратные метры)</SelectItem>
+                      <SelectItem value="м³">м³ (кубические метры)</SelectItem>
+                      <SelectItem value="упак">упак (упаковки)</SelectItem>
+                      <SelectItem value="компл">компл (комплекты)</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
                 <Button className="mt-4" onClick={handleAddProduct}>Сохранить</Button>
               </div>

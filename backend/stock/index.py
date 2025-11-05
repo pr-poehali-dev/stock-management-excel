@@ -65,6 +65,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             min_stock = int(body.get('min_stock', 0))
             price = float(body.get('price', 0))
             batch = body.get('batch', '')
+            unit = body.get('unit', 'шт')
             
             if not name or not inventory_number:
                 return {
@@ -80,14 +81,15 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             try:
                 with conn.cursor(cursor_factory=RealDictCursor) as cur:
                     cur.execute(
-                        "INSERT INTO products (name, inventory_number, quantity, min_stock, price, batch) VALUES ('" + 
+                        "INSERT INTO products (name, inventory_number, quantity, min_stock, price, batch, unit) VALUES ('" + 
                         str(name).replace("'", "''") + "', '" + 
                         str(inventory_number).replace("'", "''") + "', " + 
                         str(quantity) + ", " + 
                         str(min_stock) + ", " + 
                         str(price) + ", '" + 
-                        str(batch).replace("'", "''") + "') " +
-                        "RETURNING id, name, inventory_number, quantity, min_stock, price, batch, created_at"
+                        str(batch).replace("'", "''") + "', '" +
+                        str(unit).replace("'", "''") + "') " +
+                        "RETURNING id, name, inventory_number, quantity, min_stock, price, batch, unit, created_at"
                     )
                     
                     product = cur.fetchone()
