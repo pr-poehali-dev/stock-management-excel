@@ -26,6 +26,7 @@ const Index = () => {
   const [stockData, setStockData] = useState([]);
   const [recentMovements, setRecentMovements] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [initialLoad, setInitialLoad] = useState(true);
   const [newProductOpen, setNewProductOpen] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -45,6 +46,7 @@ const Index = () => {
       setStockData(offlineData.products || []);
       setRecentMovements(offlineData.movements || []);
       setLoading(false);
+      setInitialLoad(false);
       toast({
         title: "Офлайн режим",
         description: "Показаны данные из кэша",
@@ -99,6 +101,7 @@ const Index = () => {
       }
     } finally {
       setLoading(false);
+      setInitialLoad(false);
     }
   };
 
@@ -276,7 +279,7 @@ const Index = () => {
     return <LoginPage />;
   }
 
-  if (loading) {
+  if (initialLoad) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
