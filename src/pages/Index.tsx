@@ -1,21 +1,17 @@
 import { useState, useEffect } from "react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import Icon from "@/components/ui/icon";
 import { useAuth } from "@/contexts/AuthContext";
 import LoginPage from "@/components/LoginPage";
+import { StockHeader } from "@/components/StockHeader";
 import { StatsCards } from "@/components/StatsCards";
 import { StockTabs } from "@/components/StockTabs";
 import { Reports } from "@/components/Reports";
 import { WriteOffAct } from "@/components/WriteOffAct";
-import { NotificationCenter, StockAlerts } from "@/components/NotificationCenter";
+import { StockAlerts } from "@/components/NotificationCenter";
+import { StockToolbar } from "@/components/Toolbar/StockToolbar";
 import { useToast } from "@/hooks/use-toast";
 import { useOfflineStorage } from "@/hooks/useOfflineStorage";
-
 
 const STOCK_API = 'https://functions.poehali.dev/854afd98-2bf3-4236-b8b0-7995df44c841';
 const MOVEMENTS_API = 'https://functions.poehali.dev/178c4661-b69a-4921-8960-35d7db62c2d5';
@@ -308,173 +304,30 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="border-b bg-[#217346] text-white px-4 py-2 flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <h1 className="text-xl font-semibold">Складской учёт</h1>
-          {!isOnline && (
-            <span className="inline-flex items-center gap-1 px-2 py-1 rounded bg-yellow-500 text-white text-xs font-medium">
-              <Icon name="WifiOff" size={12} />
-              Офлайн
-            </span>
-          )}
-        </div>
-        <div className="flex items-center gap-3">
-          <NotificationCenter stockData={stockData} />
-          <div className="flex items-center gap-2 px-3 py-1 bg-white/20 rounded">
-            <Icon name={isAdmin ? "Shield" : "User"} size={16} />
-            <span className="text-sm">{user?.name}</span>
-          </div>
-          <Button variant="ghost" onClick={logout} className="gap-2 text-white hover:bg-white/20">
-            <Icon name="LogOut" size={16} />
-          </Button>
-        </div>
-      </div>
+      <StockHeader 
+        isOnline={isOnline}
+        isAdmin={isAdmin}
+        userName={user?.name}
+        onLogout={logout}
+        stockData={stockData}
+      />
 
       <div className="border-b bg-[#f3f3f3] px-4 py-2 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Button size="sm" variant="ghost" className="gap-2 text-sm font-normal" onClick={handleExportExcel}>
-            <Icon name="Download" size={16} />
-            Скачать
-          </Button>
-          <Dialog open={importOpen} onOpenChange={setImportOpen}>
-            <DialogTrigger asChild>
-              <Button size="sm" variant="ghost" className="gap-2 text-sm font-normal" disabled={!isAdmin}>
-                <Icon name="Upload" size={16} />
-                Импорт
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Импорт из Excel</DialogTitle>
-              </DialogHeader>
-              <div className="space-y-4 py-4">
-                <p className="text-sm text-muted-foreground">
-                  Загрузите Excel файл с товарами. Файл должен содержать колонки: Название, Инвентарный номер, Количество, Мин. остаток, Цена, Партия
-                </p>
-                <Input
-                  type="file"
-                  accept=".xlsx,.xls"
-                  onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
-                />
-                {selectedFile && (
-                  <p className="text-sm">Выбран файл: {selectedFile.name}</p>
-                )}
-                <Button className="w-full" onClick={handleImportExcel} disabled={!selectedFile}>
-                  <Icon name="Upload" size={18} className="mr-2" />
-                  Импортировать
-                </Button>
-              </div>
-            </DialogContent>
-          </Dialog>
-          {isAdmin && (
-            <Button 
-              size="sm" 
-              variant="ghost" 
-              className="gap-2 text-sm font-normal text-destructive hover:text-destructive hover:bg-destructive/10" 
-              onClick={handleClearDatabase}
-            >
-              <Icon name="Trash2" size={16} />
-              Очистить базу
-            </Button>
-          )}
-          <Dialog open={newProductOpen} onOpenChange={setNewProductOpen}>
-            <DialogTrigger asChild>
-              <Button size="sm" variant="ghost" className="gap-2 text-sm font-normal" disabled={!isAdmin}>
-                <Icon name="Plus" size={16} />
-                Добавить
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-2xl">
-              <DialogHeader>
-                <DialogTitle>Новый товар</DialogTitle>
-              </DialogHeader>
-              <div className="grid gap-4 py-4">
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="name" className="text-right">Название</Label>
-                  <Input 
-                    id="name" 
-                    className="col-span-3" 
-                    value={newProduct.name}
-                    onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })}
-                  />
-                </div>
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="inventory_number" className="text-right">Инвентарный номер</Label>
-                  <Input 
-                    id="inventory_number" 
-                    className="col-span-3"
-                    value={newProduct.inventory_number}
-                    onChange={(e) => setNewProduct({ ...newProduct, inventory_number: e.target.value })}
-                  />
-                </div>
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="quantity" className="text-right">Количество</Label>
-                  <Input 
-                    id="quantity" 
-                    type="number" 
-                    className="col-span-3"
-                    value={newProduct.quantity}
-                    onChange={(e) => setNewProduct({ ...newProduct, quantity: parseInt(e.target.value) })}
-                  />
-                </div>
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="min_stock" className="text-right">Мин. остаток</Label>
-                  <Input 
-                    id="min_stock" 
-                    type="number" 
-                    className="col-span-3"
-                    value={newProduct.min_stock}
-                    onChange={(e) => setNewProduct({ ...newProduct, min_stock: parseInt(e.target.value) })}
-                  />
-                </div>
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="price" className="text-right">Цена</Label>
-                  <Input 
-                    id="price" 
-                    type="number" 
-                    className="col-span-3"
-                    value={newProduct.price}
-                    onChange={(e) => setNewProduct({ ...newProduct, price: parseFloat(e.target.value) })}
-                  />
-                </div>
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="batch" className="text-right">Партия</Label>
-                  <Input 
-                    id="batch" 
-                    className="col-span-3"
-                    value={newProduct.batch}
-                    onChange={(e) => setNewProduct({ ...newProduct, batch: e.target.value })}
-                  />
-                </div>
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="unit" className="text-right">Ед. измерения</Label>
-                  <Select 
-                    value={newProduct.unit} 
-                    onValueChange={(val) => setNewProduct({ ...newProduct, unit: val })}
-                  >
-                    <SelectTrigger className="col-span-3">
-                      <SelectValue placeholder="Выберите единицу" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="шт">шт (штуки)</SelectItem>
-                      <SelectItem value="кг">кг (килограммы)</SelectItem>
-                      <SelectItem value="г">г (граммы)</SelectItem>
-                      <SelectItem value="л">л (литры)</SelectItem>
-                      <SelectItem value="мл">мл (миллилитры)</SelectItem>
-                      <SelectItem value="м">м (метры)</SelectItem>
-                      <SelectItem value="см">см (сантиметры)</SelectItem>
-                      <SelectItem value="м²">м² (квадратные метры)</SelectItem>
-                      <SelectItem value="м³">м³ (кубические метры)</SelectItem>
-                      <SelectItem value="упак">упак (упаковки)</SelectItem>
-                      <SelectItem value="компл">компл (комплекты)</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <Button className="mt-4" onClick={handleAddProduct}>Сохранить</Button>
-              </div>
-            </DialogContent>
-          </Dialog>
-        </div>
+        <StockToolbar
+          isAdmin={isAdmin}
+          onExport={handleExportExcel}
+          onClearDatabase={handleClearDatabase}
+          importOpen={importOpen}
+          onImportOpenChange={setImportOpen}
+          selectedFile={selectedFile}
+          onFileChange={setSelectedFile}
+          onImport={handleImportExcel}
+          newProductOpen={newProductOpen}
+          onNewProductOpenChange={setNewProductOpen}
+          newProduct={newProduct}
+          onProductChange={setNewProduct}
+          onAddProduct={handleAddProduct}
+        />
         <div className="flex items-center gap-2">
           <StatsCards stockData={stockData} />
         </div>
@@ -487,45 +340,44 @@ const Index = () => {
               <Icon name="Database" size={16} />
               Остатки
             </TabsTrigger>
-            <TabsTrigger value="incoming" className="gap-2 rounded-none border-b-2 border-transparent data-[state=active]:border-[#217346] data-[state=active]:bg-white px-4 py-2" disabled={!isAdmin}>
+            <TabsTrigger value="incoming" className="gap-2 rounded-none border-b-2 border-transparent data-[state=active]:border-[#217346] data-[state=active]:bg-white px-4 py-2">
               <Icon name="PackagePlus" size={16} />
               Поступление
             </TabsTrigger>
-            <TabsTrigger value="outgoing" className="gap-2 rounded-none border-b-2 border-transparent data-[state=active]:border-[#217346] data-[state=active]:bg-white px-4 py-2" disabled={!isAdmin}>
+            <TabsTrigger value="outgoing" className="gap-2 rounded-none border-b-2 border-transparent data-[state=active]:border-[#217346] data-[state=active]:bg-white px-4 py-2">
               <Icon name="PackageMinus" size={16} />
               Списание
             </TabsTrigger>
-            <TabsTrigger value="history" className="gap-2 rounded-none border-b-2 border-transparent data-[state=active]:border-[#217346] data-[state=active]:bg-white px-4 py-2">
-              <Icon name="History" size={16} />
-              История
+            <TabsTrigger value="writeoff" className="gap-2 rounded-none border-b-2 border-transparent data-[state=active]:border-[#217346] data-[state=active]:bg-white px-4 py-2">
+              <Icon name="FileText" size={16} />
+              Акт списания
             </TabsTrigger>
             <TabsTrigger value="reports" className="gap-2 rounded-none border-b-2 border-transparent data-[state=active]:border-[#217346] data-[state=active]:bg-white px-4 py-2">
               <Icon name="BarChart3" size={16} />
               Отчёты
             </TabsTrigger>
-            <TabsTrigger value="writeoff" className="gap-2 rounded-none border-b-2 border-transparent data-[state=active]:border-[#217346] data-[state=active]:bg-white px-4 py-2" disabled={!isAdmin}>
-              <Icon name="FileText" size={16} />
-              Акты
-            </TabsTrigger>
-            {isAdmin && (
-              <TabsTrigger value="users" className="gap-2 rounded-none border-b-2 border-transparent data-[state=active]:border-[#217346] data-[state=active]:bg-white px-4 py-2">
-                <Icon name="Users" size={16} />
-                Пользователи
-              </TabsTrigger>
-            )}
           </TabsList>
 
-          <StockTabs 
-            stockData={stockData} 
-            recentMovements={recentMovements} 
-            chartData={chartData} 
-            categoryData={categoryData}
-            isAdmin={isAdmin}
-            onDataUpdate={loadData}
-          />
-          
-          {activeTab === "reports" && <Reports stockData={stockData} />}
-          {activeTab === "writeoff" && isAdmin && <WriteOffAct stockData={stockData} onDataUpdate={loadData} />}
+          <div className="p-6">
+            <StockAlerts stockData={stockData} />
+            
+            <StockTabs
+              stockData={stockData}
+              recentMovements={recentMovements}
+              chartData={chartData}
+              categoryData={categoryData}
+              isAdmin={isAdmin}
+              onDataUpdate={loadData}
+            />
+
+            <div className={activeTab === "writeoff" ? "" : "hidden"}>
+              <WriteOffAct stockData={stockData} onDataUpdate={loadData} />
+            </div>
+
+            <div className={activeTab === "reports" ? "" : "hidden"}>
+              <Reports chartData={chartData} categoryData={categoryData} />
+            </div>
+          </div>
         </Tabs>
       </div>
     </div>
