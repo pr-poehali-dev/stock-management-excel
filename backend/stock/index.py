@@ -33,7 +33,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         if method == 'GET':
             with conn.cursor(cursor_factory=RealDictCursor) as cur:
                 cur.execute('''
-                    SELECT id, name, inventory_number, quantity, min_stock, price, batch, 
+                    SELECT id, name, inventory_number, quantity, min_stock, price, batch, unit,
                            created_at, updated_at
                     FROM products
                     ORDER BY created_at DESC

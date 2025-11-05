@@ -25,6 +25,7 @@ interface StockItem {
   price: number;
   batch: string;
   status: string;
+  unit?: string;
 }
 
 interface Movement {
@@ -304,6 +305,7 @@ export function StockTabs({ stockData, recentMovements, chartData, categoryData,
                 <TableHead className="text-white font-semibold border-r border-gray-400">Название</TableHead>
                 <TableHead className="text-white font-semibold border-r border-gray-400">Инвентарный номер</TableHead>
                 <TableHead className="text-white font-semibold border-r border-gray-400 text-right">Количество</TableHead>
+                <TableHead className="text-white font-semibold border-r border-gray-400">Ед. изм.</TableHead>
                 <TableHead className="text-white font-semibold border-r border-gray-400">Партия</TableHead>
                 <TableHead className="text-white font-semibold border-r border-gray-400 text-right">Цена</TableHead>
                 <TableHead className="text-white font-semibold">Статус</TableHead>
@@ -316,6 +318,7 @@ export function StockTabs({ stockData, recentMovements, chartData, categoryData,
                     <TableCell className="border-r border-gray-300 font-medium">{item.name}</TableCell>
                     <TableCell className="border-r border-gray-300">{item.inventory_number}</TableCell>
                     <TableCell className="border-r border-gray-300 text-right">{item.quantity}</TableCell>
+                    <TableCell className="border-r border-gray-300">{item.unit || 'шт'}</TableCell>
                     <TableCell className="border-r border-gray-300">{item.batch}</TableCell>
                     <TableCell className="border-r border-gray-300 text-right">{item.price.toLocaleString()} ₽</TableCell>
                     <TableCell>
@@ -333,7 +336,7 @@ export function StockTabs({ stockData, recentMovements, chartData, categoryData,
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
+                  <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
                     Нет товаров. Добавьте первый товар через кнопку "Добавить"
                   </TableCell>
                 </TableRow>

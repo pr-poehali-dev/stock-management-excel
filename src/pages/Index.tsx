@@ -72,6 +72,7 @@ const Index = () => {
         minStock: p.min_stock,
         price: p.price,
         batch: p.batch || '',
+        unit: p.unit || 'шт',
         status: p.quantity < p.min_stock / 2 ? 'Критично' : p.quantity < p.min_stock ? 'Мало' : 'В наличии'
       }));
       
