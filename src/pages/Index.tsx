@@ -310,6 +310,7 @@ const Index = () => {
         userName={user?.name}
         onLogout={logout}
         stockData={stockData}
+        loading={loading}
       />
 
       <div className="border-b bg-[#f3f3f3] px-4 py-2 flex items-center justify-between">
