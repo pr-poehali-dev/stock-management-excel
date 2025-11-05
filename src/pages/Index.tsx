@@ -108,6 +108,8 @@ const Index = () => {
   useEffect(() => {
     if (isAuthenticated) {
       loadData();
+    } else {
+      setInitialLoad(false);
     }
   }, [isAuthenticated]);
 
