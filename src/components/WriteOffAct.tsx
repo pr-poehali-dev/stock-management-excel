@@ -21,7 +21,8 @@ export function WriteOffAct({ stockData, onDataUpdate }: WriteOffActProps) {
     actNumber: `АКТ-${new Date().getFullYear()}-${Date.now().toString().slice(-4)}`,
     date: new Date().toISOString().split('T')[0],
     responsible: '',
-    commission: ''
+    commission: '',
+    commissionMembers: ['', '', '']
   });
   const [items, setItems] = useState<ActItem[]>([
     { product: null, quantity: 0, reason: '' }
@@ -133,7 +134,8 @@ export function WriteOffAct({ stockData, onDataUpdate }: WriteOffActProps) {
       actNumber: `АКТ-${new Date().getFullYear()}-${Date.now().toString().slice(-4)}`,
       date: new Date().toISOString().split('T')[0],
       responsible: '',
-      commission: ''
+      commission: '',
+      commissionMembers: ['', '', '']
     });
     setItems([{ product: null, quantity: 0, reason: '' }]);
   };
@@ -143,7 +145,8 @@ export function WriteOffAct({ stockData, onDataUpdate }: WriteOffActProps) {
       actNumber: `АКТ-${new Date().getFullYear()}-${Date.now().toString().slice(-4)}`,
       date: new Date().toISOString().split('T')[0],
       responsible: '',
-      commission: ''
+      commission: '',
+      commissionMembers: ['', '', '']
     });
     setItems([{ product: null, quantity: 0, reason: '' }]);
   };

@@ -79,7 +79,10 @@ export function generateActHTML(
 
       <div class="info">
         <p><strong>Ответственное лицо:</strong> ${actData.responsible || '_________________'}</p>
-        <p><strong>Комиссия:</strong> ${actData.commission || '_________________'}</p>
+        <p><strong>Комиссия по списанию:</strong></p>
+        <ul>
+          ${actData.commissionMembers.filter(m => m.trim()).map(member => `<li>${member}</li>`).join('') || '<li>_________________</li>'}
+        </ul>
       </div>
 
       <p>Настоящий акт составлен о том, что комиссия произвела списание следующих товарно-материальных ценностей:</p>
@@ -117,17 +120,15 @@ export function generateActHTML(
 
       <div class="signatures">
         <div class="signature-line">
-          <span>Председатель комиссии</span>
+          <span>Ответственное лицо: ${actData.responsible || '______________'}</span>
           <span>________________</span>
         </div>
-        <div class="signature-line">
-          <span>Члены комиссии</span>
-          <span>________________</span>
-        </div>
-        <div class="signature-line">
-          <span></span>
-          <span>________________</span>
-        </div>
+        ${actData.commissionMembers.filter(m => m.trim()).map(member => `
+          <div class="signature-line">
+            <span>Член комиссии: ${member}</span>
+            <span>________________</span>
+          </div>
+        `).join('')}
       </div>
     </body>
     </html>

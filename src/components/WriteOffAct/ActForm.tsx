@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import Icon from "@/components/ui/icon";
 import { ActItem, ActData, StockItem } from "./types";
+import { useState } from "react";
 
 interface ActFormProps {
   actData: ActData;
@@ -60,13 +61,50 @@ export function ActForm({
             onChange={(e) => onActDataChange({ ...actData, responsible: e.target.value })}
           />
         </div>
-        <div>
-          <Label>Комиссия</Label>
-          <Input 
-            placeholder="Члены комиссии"
-            value={actData.commission}
-            onChange={(e) => onActDataChange({ ...actData, commission: e.target.value })}
-          />
+        <div className="md:col-span-2">
+          <Label>Комиссия по списанию</Label>
+          <div className="space-y-2 mt-2">
+            {actData.commissionMembers.map((member, idx) => (
+              <div key={idx} className="flex gap-2">
+                <Input 
+                  placeholder={`ФИО члена комиссии ${idx + 1}`}
+                  value={member}
+                  onChange={(e) => {
+                    const newMembers = [...actData.commissionMembers];
+                    newMembers[idx] = e.target.value;
+                    onActDataChange({ ...actData, commissionMembers: newMembers });
+                  }}
+                />
+                {actData.commissionMembers.length > 1 && (
+                  <Button 
+                    variant="ghost" 
+                    size="icon"
+                    onClick={() => {
+                      const newMembers = actData.commissionMembers.filter((_, i) => i !== idx);
+                      onActDataChange({ ...actData, commissionMembers: newMembers });
+                    }}
+                    className="text-destructive hover:text-destructive"
+                  >
+                    <Icon name="X" size={16} />
+                  </Button>
+                )}
+              </div>
+            ))}
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => {
+                onActDataChange({ 
+                  ...actData, 
+                  commissionMembers: [...actData.commissionMembers, ''] 
+                });
+              }}
+              className="gap-2 w-full"
+            >
+              <Icon name="Plus" size={16} />
+              Добавить члена комиссии
+            </Button>
+          </div>
         </div>
       </div>
 

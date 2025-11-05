@@ -17,4 +17,5 @@ export interface ActData {
   date: string;
   responsible: string;
   commission: string;
+  commissionMembers: string[];
 }

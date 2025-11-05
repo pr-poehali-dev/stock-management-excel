@@ -43,7 +43,15 @@ export function ActPreview({
           </div>
           <div className="space-y-2 text-sm">
             <p><strong>Ответственное лицо:</strong> {actData.responsible || '_________________'}</p>
-            <p><strong>Комиссия:</strong> {actData.commission || '_________________'}</p>
+            <p><strong>Комиссия по списанию:</strong></p>
+            <ul className="list-disc list-inside ml-4">
+              {actData.commissionMembers.filter(m => m.trim()).length > 0 
+                ? actData.commissionMembers.filter(m => m.trim()).map((member, idx) => (
+                    <li key={idx}>{member}</li>
+                  ))
+                : <li className="list-none">_________________</li>
+              }
+            </ul>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full border-collapse text-sm">
