@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import Icon from "@/components/ui/icon";
 import { ActItem, ActData } from "./types";
+import { formatQuantity } from "@/utils/format";
 
 interface ActPreviewProps {
   isOpen: boolean;
@@ -72,7 +73,7 @@ export function ActPreview({
                     <td className="border p-2">{idx + 1}</td>
                     <td className="border p-2">{item.product?.name}</td>
                     <td className="border p-2">{item.product?.inventory_number}</td>
-                    <td className="border p-2">{item.quantity} шт</td>
+                    <td className="border p-2">{formatQuantity(item.quantity)} шт</td>
                     <td className="border p-2">{item.product?.price.toLocaleString('ru-RU')} ₽</td>
                     <td className="border p-2">{((item.product?.price || 0) * item.quantity).toLocaleString('ru-RU')} ₽</td>
                     <td className="border p-2">{item.reason}</td>

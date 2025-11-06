@@ -13,6 +13,7 @@ import { UserAddDialog, UsersTable } from "./UserManagement";
 import { BarcodeScanner } from "./BarcodeScanner";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import { formatQuantity } from "@/utils/format";
 
 const MOVEMENTS_API = 'https://functions.poehali.dev/178c4661-b69a-4921-8960-35d7db62c2d5';
 
@@ -317,7 +318,7 @@ export function StockTabs({ stockData, recentMovements, chartData, categoryData,
                   <TableRow key={item.inventory_number} className={`border-b hover:bg-gray-50 ${idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
                     <TableCell className="border-r border-gray-300 font-medium">{item.name}</TableCell>
                     <TableCell className="border-r border-gray-300">{item.inventory_number}</TableCell>
-                    <TableCell className="border-r border-gray-300 text-right">{item.quantity}</TableCell>
+                    <TableCell className="border-r border-gray-300 text-right">{formatQuantity(item.quantity)}</TableCell>
                     <TableCell className="border-r border-gray-300">{item.unit || 'шт'}</TableCell>
                     <TableCell className="border-r border-gray-300">{item.batch}</TableCell>
                     <TableCell className="border-r border-gray-300 text-right">{item.price.toLocaleString()} ₽</TableCell>
@@ -372,7 +373,7 @@ export function StockTabs({ stockData, recentMovements, chartData, categoryData,
                       </span>
                     </TableCell>
                     <TableCell className={`border-r border-gray-300 text-right font-medium ${movement.quantity > 0 ? "text-green-600" : "text-red-600"}`}>
-                      {movement.quantity > 0 ? "+" : ""}{movement.quantity}
+                      {movement.quantity > 0 ? "+" : ""}{formatQuantity(movement.quantity)}
                     </TableCell>
                     <TableCell>{movement.user}</TableCell>
                   </TableRow>

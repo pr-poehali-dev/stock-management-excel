@@ -9,6 +9,7 @@ import Icon from "@/components/ui/icon";
 import { Badge } from "@/components/ui/badge";
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
 import { useToast } from "@/hooks/use-toast";
+import { formatQuantity } from "@/utils/format";
 
 const MOVEMENTS_API = 'https://functions.poehali.dev/178c4661-b69a-4921-8960-35d7db62c2d5';
 
@@ -240,7 +241,7 @@ export function Reports({ stockData }: ReportsProps) {
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Поступило</p>
-                <p className="text-2xl font-bold text-secondary">+{stats.totalIncoming}</p>
+                <p className="text-2xl font-bold text-secondary">+{formatQuantity(stats.totalIncoming)}</p>
               </div>
             </div>
           </Card>
@@ -251,7 +252,7 @@ export function Reports({ stockData }: ReportsProps) {
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Списано</p>
-                <p className="text-2xl font-bold text-destructive">-{stats.totalOutgoing}</p>
+                <p className="text-2xl font-bold text-destructive">-{formatQuantity(stats.totalOutgoing)}</p>
               </div>
             </div>
           </Card>
@@ -263,7 +264,7 @@ export function Reports({ stockData }: ReportsProps) {
               <div>
                 <p className="text-sm text-muted-foreground">Баланс</p>
                 <p className={`text-2xl font-bold ${stats.balance >= 0 ? 'text-secondary' : 'text-destructive'}`}>
-                  {stats.balance >= 0 ? '+' : ''}{stats.balance}
+                  {stats.balance >= 0 ? '+' : ''}{formatQuantity(stats.balance)}
                 </p>
               </div>
             </div>
@@ -312,7 +313,7 @@ export function Reports({ stockData }: ReportsProps) {
                       </Badge>
                     </TableCell>
                     <TableCell className={movement.quantity > 0 ? "text-secondary" : "text-destructive"}>
-                      {movement.quantity > 0 ? "+" : ""}{movement.quantity}
+                      {movement.quantity > 0 ? "+" : ""}{formatQuantity(movement.quantity)}
                     </TableCell>
                     <TableCell>{movement.user}</TableCell>
                     <TableCell className="text-muted-foreground">{movement.reason || '—'}</TableCell>

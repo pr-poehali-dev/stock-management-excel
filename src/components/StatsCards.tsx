@@ -1,5 +1,6 @@
 import { Card } from "@/components/ui/card";
 import Icon from "@/components/ui/icon";
+import { formatQuantity } from "@/utils/format";
 
 interface StockItem {
   quantity: number;
@@ -40,7 +41,7 @@ export function StatsCards({ stockData }: StatsCardsProps) {
     <div className="flex items-center gap-4 text-xs">
       <div className="flex items-center gap-1">
         <span className="text-muted-foreground">Товаров:</span>
-        <span className="font-semibold">{stockData.reduce((sum, item) => sum + item.quantity, 0)}</span>
+        <span className="font-semibold">{formatQuantity(stockData.reduce((sum, item) => sum + item.quantity, 0))}</span>
       </div>
       <div className="h-4 w-px bg-border"></div>
       <div className="flex items-center gap-1">
