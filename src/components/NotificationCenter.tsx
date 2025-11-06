@@ -242,13 +242,20 @@ export function NotificationCenter({ stockData }: NotificationCenterProps) {
 
 export function StockAlerts({ stockData }: NotificationCenterProps) {
   const [alerts, setAlerts] = useState<StockItem[]>([]);
+  const [dismissedAlerts, setDismissedAlerts] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     const lowStockItems = stockData.filter(item => 
-      item.quantity <= item.minStock && item.quantity > item.minStock / 2
+      item.quantity <= item.minStock && 
+      item.quantity > item.minStock / 2 &&
+      !dismissedAlerts.has(item.inventory_number)
     );
     setAlerts(lowStockItems);
-  }, [stockData]);
+  }, [stockData, dismissedAlerts]);
+
+  const dismissAlert = (inventoryNumber: string) => {
+    setDismissedAlerts(prev => new Set(prev).add(inventoryNumber));
+  };
 
   if (alerts.length === 0) return null;
 
@@ -265,11 +272,21 @@ export function StockAlerts({ stockData }: NotificationCenterProps) {
             </h3>
             <div className="space-y-2">
               {alerts.map((item) => (
-                <div key={item.inventory_number} className="flex items-center justify-between text-sm">
+                <div key={item.inventory_number} className="flex items-center justify-between text-sm gap-2">
                   <span className="font-medium text-yellow-900">{item.name}</span>
-                  <Badge variant="outline" className="border-yellow-600 text-yellow-700">
-                    {item.quantity} / {item.minStock} шт
-                  </Badge>
+                  <div className="flex items-center gap-2">
+                    <Badge variant="outline" className="border-yellow-600 text-yellow-700">
+                      {item.quantity} / {item.minStock} шт
+                    </Badge>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-6 w-6 hover:bg-yellow-200"
+                      onClick={() => dismissAlert(item.inventory_number)}
+                    >
+                      <Icon name="X" size={14} className="text-yellow-700" />
+                    </Button>
+                  </div>
                 </div>
               ))}
             </div>
