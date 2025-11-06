@@ -1,5 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Input } from "@/components/ui/input";
 import Icon from "@/components/ui/icon";
 import { useAuth } from "@/contexts/AuthContext";
 import LoginPage from "@/components/LoginPage";
@@ -26,6 +27,7 @@ const Index = () => {
   const [stockData, setStockData] = useState([]);
   const [recentMovements, setRecentMovements] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
   const [initialLoad, setInitialLoad] = useState(true);
   const [newProductOpen, setNewProductOpen] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
@@ -307,6 +309,17 @@ const Index = () => {
     { name: "Мониторы", value: 23, color: "#F59E0B" },
   ];
 
+  const filteredStockData = useMemo(() => {
+    if (!searchQuery.trim()) return stockData;
+    
+    const query = searchQuery.toLowerCase().trim();
+    return stockData.filter((item: any) => 
+      item.name?.toLowerCase().includes(query) ||
+      item.inventory_number?.toLowerCase().includes(query) ||
+      item.batch?.toLowerCase().includes(query)
+    );
+  }, [stockData, searchQuery]);
+
   return (
     <div className="min-h-screen bg-background">
       <StockHeader 
@@ -367,8 +380,22 @@ const Index = () => {
           <div className="p-6">
             <StockAlerts stockData={stockData} />
             
+            {activeTab === "stock" && (
+              <div className="mb-6">
+                <div className="relative max-w-md">
+                  <Icon name="Search" className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={18} />
+                  <Input
+                    placeholder="Поиск по названию, артикулу или партии..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
+              </div>
+            )}
+            
             <StockTabs
-              stockData={stockData}
+              stockData={activeTab === "stock" ? filteredStockData : stockData}
               recentMovements={recentMovements}
               chartData={chartData}
               categoryData={categoryData}
