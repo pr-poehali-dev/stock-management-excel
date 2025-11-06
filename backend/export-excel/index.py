@@ -94,9 +94,9 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         ws.append([
             name,
             inventory_number,
-            quantity,
+            round(float(quantity), 3) if quantity else 0.000,
             unit or "шт",
-            min_stock,
+            round(float(min_stock), 3) if min_stock else 0.000,
             float(price) if price else 0,
             batch or "",
             created_at.strftime("%Y-%m-%d %H:%M") if created_at else "",

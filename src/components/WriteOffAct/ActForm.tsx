@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import Icon from "@/components/ui/icon";
 import { ActItem, ActData, StockItem } from "./types";
 import { CommissionTemplates } from "./CommissionTemplates";
+import { formatQuantity } from "@/utils/format";
 
 interface ActFormProps {
   actData: ActData;
@@ -150,14 +151,15 @@ export function ActForm({
                   <Label>Количество</Label>
                   <Input 
                     type="number"
+                    step="0.001"
                     value={item.quantity}
-                    onChange={(e) => onUpdateItem(idx, 'quantity', parseInt(e.target.value) || 0)}
+                    onChange={(e) => onUpdateItem(idx, 'quantity', parseFloat(e.target.value) || 0)}
                     placeholder="0"
                     max={item.product?.quantity || 0}
                   />
                   {item.product && (
                     <p className="text-xs text-muted-foreground mt-1">
-                      На складе: {item.product.quantity} шт
+                      На складе: {formatQuantity(item.product.quantity)} {item.product.unit || 'шт'}
                     </p>
                   )}
                 </div>

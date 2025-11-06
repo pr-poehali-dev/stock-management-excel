@@ -219,9 +219,10 @@ export function StockTabs({ stockData, recentMovements, chartData, categoryData,
                 <Label>Количество</Label>
                 <Input 
                   type="number" 
+                  step="0.001"
                   placeholder="0" 
                   value={incomingForm.quantity}
-                  onChange={(e) => setIncomingForm({ ...incomingForm, quantity: parseInt(e.target.value) || 0 })}
+                  onChange={(e) => setIncomingForm({ ...incomingForm, quantity: parseFloat(e.target.value) || 0 })}
                 />
               </div>
               <div className="md:col-span-2">
@@ -263,9 +264,10 @@ export function StockTabs({ stockData, recentMovements, chartData, categoryData,
                 <Label>Количество</Label>
                 <Input 
                   type="number" 
+                  step="0.001"
                   placeholder="0"
                   value={outgoingForm.quantity}
-                  onChange={(e) => setOutgoingForm({ ...outgoingForm, quantity: parseInt(e.target.value) || 0 })}
+                  onChange={(e) => setOutgoingForm({ ...outgoingForm, quantity: parseFloat(e.target.value) || 0 })}
                 />
               </div>
               <div>

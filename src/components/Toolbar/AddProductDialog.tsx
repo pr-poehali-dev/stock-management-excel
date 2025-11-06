@@ -66,9 +66,10 @@ export function AddProductDialog({
             <Input 
               id="quantity" 
               type="number" 
+              step="0.001"
               className="col-span-3"
               value={newProduct.quantity}
-              onChange={(e) => onProductChange({ ...newProduct, quantity: parseInt(e.target.value) })}
+              onChange={(e) => onProductChange({ ...newProduct, quantity: parseFloat(e.target.value) || 0 })}
             />
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
@@ -76,9 +77,10 @@ export function AddProductDialog({
             <Input 
               id="min_stock" 
               type="number" 
+              step="0.001"
               className="col-span-3"
               value={newProduct.min_stock}
-              onChange={(e) => onProductChange({ ...newProduct, min_stock: parseInt(e.target.value) })}
+              onChange={(e) => onProductChange({ ...newProduct, min_stock: parseFloat(e.target.value) || 0 })}
             />
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
