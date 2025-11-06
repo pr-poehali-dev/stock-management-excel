@@ -43,6 +43,17 @@ const Index = () => {
   });
   const { toast } = useToast();
 
+  const filteredStockData = useMemo(() => {
+    if (!searchQuery.trim()) return stockData;
+    
+    const query = searchQuery.toLowerCase().trim();
+    return stockData.filter((item: any) => 
+      item.name?.toLowerCase().includes(query) ||
+      item.inventory_number?.toLowerCase().includes(query) ||
+      item.batch?.toLowerCase().includes(query)
+    );
+  }, [stockData, searchQuery]);
+
   const loadData = async () => {
     if (!isOnline && offlineData) {
       setStockData(offlineData.products || []);
@@ -308,17 +319,6 @@ const Index = () => {
     { name: "Периферия", value: 98, color: "#10B981" },
     { name: "Мониторы", value: 23, color: "#F59E0B" },
   ];
-
-  const filteredStockData = useMemo(() => {
-    if (!searchQuery.trim()) return stockData;
-    
-    const query = searchQuery.toLowerCase().trim();
-    return stockData.filter((item: any) => 
-      item.name?.toLowerCase().includes(query) ||
-      item.inventory_number?.toLowerCase().includes(query) ||
-      item.batch?.toLowerCase().includes(query)
-    );
-  }, [stockData, searchQuery]);
 
   return (
     <div className="min-h-screen bg-background">
