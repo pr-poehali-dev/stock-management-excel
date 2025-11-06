@@ -73,7 +73,7 @@ export function StockTabs({ stockData, recentMovements, chartData, categoryData,
   });
 
   const handleBarcodeIncoming = async (inventory_number: string, quantity: number) => {
-    const product = stockData.find(item => item.inventory_number === inventory_number);
+    const product = stockData?.find(item => item.inventory_number === inventory_number);
     if (!product?.id) return;
 
     try {
@@ -208,7 +208,7 @@ export function StockTabs({ stockData, recentMovements, chartData, categoryData,
                     <SelectValue placeholder="Выберите товар" />
                   </SelectTrigger>
                   <SelectContent>
-                    {stockData.map((item) => (
+                    {stockData?.map((item) => (
                       <SelectItem key={item.id} value={item.id?.toString() || ''}>{item.name}</SelectItem>
                     ))}
                   </SelectContent>
@@ -252,7 +252,7 @@ export function StockTabs({ stockData, recentMovements, chartData, categoryData,
                     <SelectValue placeholder="Выберите товар" />
                   </SelectTrigger>
                   <SelectContent>
-                    {stockData.map((item) => (
+                    {stockData?.map((item) => (
                       <SelectItem key={item.id} value={item.id?.toString() || ''}>{item.name}</SelectItem>
                     ))}
                   </SelectContent>

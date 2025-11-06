@@ -138,7 +138,7 @@ export function ActForm({
                       <SelectValue placeholder="Выберите товар" />
                     </SelectTrigger>
                     <SelectContent>
-                      {stockData.map((product) => (
+                      {stockData?.map((product) => (
                         <SelectItem key={product.id} value={product.id?.toString() || ''}>
                           {product.name}
                         </SelectItem>

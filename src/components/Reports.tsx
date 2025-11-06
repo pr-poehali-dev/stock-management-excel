@@ -77,7 +77,7 @@ export function Reports({ stockData }: ReportsProps) {
     }
 
     if (filters.productId !== 'all') {
-      const product = stockData.find(p => p.id?.toString() === filters.productId);
+      const product = stockData?.find(p => p.id?.toString() === filters.productId);
       if (product) {
         filtered = filtered.filter(m => m.product === product.name);
       }
@@ -211,7 +211,7 @@ export function Reports({ stockData }: ReportsProps) {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Все товары</SelectItem>
-                {stockData.map((item) => (
+                {stockData?.map((item) => (
                   <SelectItem key={item.id} value={item.id?.toString() || ''}>{item.name}</SelectItem>
                 ))}
               </SelectContent>

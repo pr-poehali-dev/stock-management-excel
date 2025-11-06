@@ -41,6 +41,10 @@ export function NotificationCenter({ stockData }: NotificationCenterProps) {
   }, [stockData]);
 
   const checkStockLevels = () => {
+    if (!stockData || !Array.isArray(stockData)) {
+      return;
+    }
+
     const newNotifications: Notification[] = [];
 
     stockData.forEach((item) => {
