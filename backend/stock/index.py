@@ -41,7 +41,9 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                 products = cur.fetchall()
                 
                 for product in products:
-                    product['price'] = float(product['price'])
+                    product['quantity'] = float(product['quantity']) if product['quantity'] is not None else 0
+                    product['min_stock'] = float(product['min_stock']) if product['min_stock'] is not None else 0
+                    product['price'] = float(product['price']) if product['price'] is not None else 0
                     if product['created_at']:
                         product['created_at'] = product['created_at'].isoformat()
                     if product['updated_at']:
@@ -93,7 +95,9 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
                     )
                     
                     product = cur.fetchone()
-                    product['price'] = float(product['price'])
+                    product['quantity'] = float(product['quantity']) if product['quantity'] is not None else 0
+                    product['min_stock'] = float(product['min_stock']) if product['min_stock'] is not None else 0
+                    product['price'] = float(product['price']) if product['price'] is not None else 0
                     if product['created_at']:
                         product['created_at'] = product['created_at'].isoformat()
                     
