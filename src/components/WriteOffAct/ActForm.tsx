@@ -49,19 +49,47 @@ export function ActForm({
         
         <div className="mb-4 flex justify-end">
           <div className="w-full md:w-1/2">
-            <Label>Утверждено</Label>
-            <div className="space-y-2 mt-2">
+            <div className="flex justify-between items-center mb-2">
+              <Label>Утверждено</Label>
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                onClick={() => {
+                  onActDataChange({ ...actData, approvedBy: [...actData.approvedBy, ''] });
+                }}
+                className="gap-1"
+              >
+                <Icon name="Plus" size={14} />
+                Добавить строку
+              </Button>
+            </div>
+            <div className="space-y-2">
               {actData.approvedBy.map((line, idx) => (
-                <Input 
-                  key={idx}
-                  placeholder={`Строка ${idx + 1}`}
-                  value={line}
-                  onChange={(e) => {
-                    const newApprovedBy = [...actData.approvedBy];
-                    newApprovedBy[idx] = e.target.value;
-                    onActDataChange({ ...actData, approvedBy: newApprovedBy });
-                  }}
-                />
+                <div key={idx} className="flex gap-2">
+                  <Input 
+                    placeholder={`Строка ${idx + 1}`}
+                    value={line}
+                    onChange={(e) => {
+                      const newApprovedBy = [...actData.approvedBy];
+                      newApprovedBy[idx] = e.target.value;
+                      onActDataChange({ ...actData, approvedBy: newApprovedBy });
+                    }}
+                  />
+                  {actData.approvedBy.length > 1 && (
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => {
+                        const newApprovedBy = actData.approvedBy.filter((_, i) => i !== idx);
+                        onActDataChange({ ...actData, approvedBy: newApprovedBy });
+                      }}
+                    >
+                      <Icon name="X" size={16} />
+                    </Button>
+                  )}
+                </div>
               ))}
             </div>
           </div>
