@@ -35,7 +35,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             with conn.cursor(cursor_factory=RealDictCursor) as cur:
                 cur.execute('''
                     SELECT id, act_number, act_date, responsible_person, 
-                           reason, items, created_at, created_by
+                           reason, items, created_at, created_by, is_draft
                     FROM writeoff_acts
                     ORDER BY act_date DESC, created_at DESC
                 ''')
@@ -65,14 +65,15 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             reason = body.get('reason')
             items = body.get('items', [])
             created_by = body.get('created_by', 'Пользователь')
+            is_draft = body.get('is_draft', False)
             
             with conn.cursor(cursor_factory=RealDictCursor) as cur:
                 cur.execute('''
                     INSERT INTO writeoff_acts 
-                    (act_number, act_date, responsible_person, reason, items, created_by)
-                    VALUES (%s, %s, %s, %s, %s, %s)
+                    (act_number, act_date, responsible_person, reason, items, created_by, is_draft)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s)
                     RETURNING id, act_number, act_date, created_at
-                ''', (act_number, act_date, responsible_person, reason, json.dumps(items), created_by))
+                ''', (act_number, act_date, responsible_person, reason, json.dumps(items), created_by, is_draft))
                 
                 act = cur.fetchone()
                 if act['act_date']:

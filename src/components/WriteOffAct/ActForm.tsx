@@ -20,6 +20,7 @@ interface ActFormProps {
   totalSum: number;
   onClear: () => void;
   onSubmit: () => void;
+  onSaveDraft: () => void;
   isProcessing: boolean;
 }
 
@@ -34,6 +35,7 @@ export function ActForm({
   totalSum,
   onClear,
   onSubmit,
+  onSaveDraft,
   isProcessing
 }: ActFormProps) {
   return (
@@ -333,6 +335,19 @@ export function ActForm({
       <div className="flex gap-2 justify-end">
         <Button variant="outline" onClick={onClear}>
           Очистить
+        </Button>
+        <Button variant="secondary" onClick={onSaveDraft} className="gap-2" disabled={isProcessing}>
+          {isProcessing ? (
+            <>
+              <Icon name="Loader2" size={16} className="animate-spin" />
+              Сохранение...
+            </>
+          ) : (
+            <>
+              <Icon name="Save" size={16} />
+              Сохранить черновик
+            </>
+          )}
         </Button>
         <Button onClick={onSubmit} className="gap-2" disabled={isProcessing}>
           {isProcessing ? (

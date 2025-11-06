@@ -132,7 +132,7 @@ export function WriteOffAct({ stockData, onDataUpdate }: WriteOffActProps) {
     }
   };
 
-  const saveActToDatabase = async () => {
+  const saveActToDatabase = async (isDraft = false) => {
     const validItems = items.filter(item => item.product && item.quantity > 0);
     
     const actItems = validItems.map(item => ({
@@ -154,15 +154,63 @@ export function WriteOffAct({ stockData, onDataUpdate }: WriteOffActProps) {
           responsible_person: actData.responsible,
           reason: actData.commission,
           items: actItems,
-          created_by: user?.name || 'Администратор'
+          created_by: user?.name || 'Администратор',
+          is_draft: isDraft
         })
       });
 
       if (!response.ok) {
         throw new Error('Failed to save act');
       }
+
+      return true;
     } catch (error) {
       console.error('Error saving act:', error);
+      return false;
+    }
+  };
+
+  const saveDraft = async () => {
+    if (items.length === 0 || !items[0].product) {
+      toast({
+        title: "Ошибка",
+        description: "Добавьте хотя бы один товар для сохранения черновика",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsProcessing(true);
+    const success = await saveActToDatabase(true);
+    setIsProcessing(false);
+
+    if (success) {
+      toast({
+        title: "Черновик сохранён",
+        description: "Акт сохранён как черновик. Списание не проведено."
+      });
+
+      setActData({
+        actNumber: `АКТ-${new Date().getFullYear()}-${Date.now().toString().slice(-4)}`,
+        actTitle: 'Акт о списании материальных ценностей',
+        date: new Date().toISOString().split('T')[0],
+        responsible: '',
+        approvedBy: ['', '', '', '', '', '', ''],
+        commission: '',
+        commissionMembers: ['', '', ''],
+        signers: [
+          { position: 'Председатель комиссии', name: '' },
+          { position: 'Член комиссии', name: '' },
+          { position: 'Член комиссии', name: '' }
+        ]
+      });
+      setItems([{ product: null, quantity: 0, reason: '' }]);
+    } else {
+      toast({
+        title: "Ошибка",
+        description: "Не удалось сохранить черновик",
+        variant: "destructive"
+      });
     }
   };
 
@@ -170,7 +218,7 @@ export function WriteOffAct({ stockData, onDataUpdate }: WriteOffActProps) {
     const success = await processWriteOff();
     if (!success) return;
 
-    await saveActToDatabase();
+    await saveActToDatabase(false);
 
     const actHTML = generateActHTML(actData, items, getTotalSum());
     printActDocument(actHTML);
@@ -237,6 +285,7 @@ export function WriteOffAct({ stockData, onDataUpdate }: WriteOffActProps) {
           totalSum={getTotalSum()}
           onClear={handleClear}
           onSubmit={printAct}
+          onSaveDraft={saveDraft}
           isProcessing={isProcessing}
         />
       </Card>

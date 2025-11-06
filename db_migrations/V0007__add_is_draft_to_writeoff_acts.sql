@@ -1,0 +1,1 @@
+ALTER TABLE writeoff_acts ADD COLUMN is_draft BOOLEAN DEFAULT FALSE;

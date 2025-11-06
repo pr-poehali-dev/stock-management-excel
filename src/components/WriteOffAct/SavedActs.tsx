@@ -24,6 +24,7 @@ interface SavedAct {
   }>;
   created_at: string;
   created_by: string;
+  is_draft: boolean;
 }
 
 export function SavedActs() {
@@ -96,6 +97,7 @@ export function SavedActs() {
               <TableRow>
                 <TableHead>Номер акта</TableHead>
                 <TableHead>Дата акта</TableHead>
+                <TableHead>Статус</TableHead>
                 <TableHead>Ответственный</TableHead>
                 <TableHead>Товаров</TableHead>
                 <TableHead>Сумма</TableHead>
@@ -108,6 +110,19 @@ export function SavedActs() {
                 <TableRow key={act.id}>
                   <TableCell className="font-medium">{act.act_number}</TableCell>
                   <TableCell>{new Date(act.act_date).toLocaleDateString('ru-RU')}</TableCell>
+                  <TableCell>
+                    {act.is_draft ? (
+                      <Badge variant="secondary" className="gap-1">
+                        <Icon name="FileEdit" size={12} />
+                        Черновик
+                      </Badge>
+                    ) : (
+                      <Badge variant="default" className="gap-1">
+                        <Icon name="CheckCircle" size={12} />
+                        Проведён
+                      </Badge>
+                    )}
+                  </TableCell>
                   <TableCell>{act.responsible_person}</TableCell>
                   <TableCell>
                     <Badge variant="outline">
@@ -148,6 +163,22 @@ export function SavedActs() {
                 <div>
                   <p className="text-sm text-muted-foreground">Дата акта</p>
                   <p className="font-medium">{new Date(selectedAct.act_date).toLocaleDateString('ru-RU')}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Статус</p>
+                  <p className="font-medium">
+                    {selectedAct.is_draft ? (
+                      <Badge variant="secondary" className="gap-1">
+                        <Icon name="FileEdit" size={12} />
+                        Черновик (списание не проведено)
+                      </Badge>
+                    ) : (
+                      <Badge variant="default" className="gap-1">
+                        <Icon name="CheckCircle" size={12} />
+                        Проведён (списание выполнено)
+                      </Badge>
+                    )}
+                  </p>
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Ответственное лицо</p>
