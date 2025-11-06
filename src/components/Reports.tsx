@@ -22,6 +22,7 @@ interface Movement {
   user: string;
   reason?: string;
   notes?: string;
+  supplier?: string;
 }
 
 interface StockItem {
@@ -59,7 +60,18 @@ export function Reports({ stockData }: ReportsProps) {
       const response = await fetch(MOVEMENTS_API);
       if (response.ok) {
         const data = await response.json();
-        setMovements(data.movements || []);
+        const formattedMovements = (data.movements || []).map((m: any) => ({
+          id: m.id,
+          date: new Date(m.created_at).toLocaleDateString('ru-RU'),
+          product: m.product_name,
+          type: m.movement_type,
+          quantity: m.movement_type === 'Поступление' ? m.quantity : -m.quantity,
+          user: m.user_name,
+          reason: m.reason || '',
+          notes: m.notes || '',
+          supplier: m.supplier || ''
+        }));
+        setMovements(formattedMovements);
       }
     } catch (error) {
       console.error('Error loading movements:', error);
@@ -135,13 +147,14 @@ export function Reports({ stockData }: ReportsProps) {
   };
 
   const exportToCSV = () => {
-    const headers = ['Дата', 'Товар', 'Тип операции', 'Количество', 'Пользователь', 'Причина', 'Примечание'];
+    const headers = ['Дата', 'Товар', 'Тип операции', 'Количество', 'Пользователь', 'Поставщик', 'Причина', 'Примечание'];
     const rows = filteredMovements.map(m => [
       m.date,
       m.product,
       m.type,
       m.quantity,
       m.user,
+      m.supplier || '',
       m.reason || '',
       m.notes || ''
     ]);
@@ -298,30 +311,34 @@ export function Reports({ stockData }: ReportsProps) {
                 <TableHead>Тип операции</TableHead>
                 <TableHead>Количество</TableHead>
                 <TableHead>Пользователь</TableHead>
-                <TableHead>Причина</TableHead>
+                <TableHead>Поставщик/Причина</TableHead>
+                <TableHead>Примечание</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {filteredMovements.length > 0 ? (
                 filteredMovements.map((movement, idx) => (
                   <TableRow key={idx}>
-                    <TableCell>{new Date(movement.date).toLocaleString('ru-RU')}</TableCell>
+                    <TableCell className="whitespace-nowrap">{movement.date}</TableCell>
                     <TableCell className="font-medium">{movement.product}</TableCell>
                     <TableCell>
                       <Badge variant={movement.type === "Поступление" ? "default" : "destructive"}>
                         {movement.type}
                       </Badge>
                     </TableCell>
-                    <TableCell className={movement.quantity > 0 ? "text-secondary" : "text-destructive"}>
+                    <TableCell className={movement.quantity > 0 ? "text-secondary font-semibold" : "text-destructive font-semibold"}>
                       {movement.quantity > 0 ? "+" : ""}{formatQuantity(movement.quantity)}
                     </TableCell>
                     <TableCell>{movement.user}</TableCell>
-                    <TableCell className="text-muted-foreground">{movement.reason || '—'}</TableCell>
+                    <TableCell className="text-muted-foreground">
+                      {movement.type === 'Поступление' ? (movement.supplier || '—') : (movement.reason || '—')}
+                    </TableCell>
+                    <TableCell className="text-muted-foreground text-sm">{movement.notes || '—'}</TableCell>
                   </TableRow>
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
+                  <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
                     Нет данных за выбранный период
                   </TableCell>
                 </TableRow>
