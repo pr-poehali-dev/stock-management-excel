@@ -14,8 +14,14 @@ export interface ActItem {
 
 export interface ActData {
   actNumber: string;
+  actTitle: string;
   date: string;
   responsible: string;
+  approvedBy: string;
   commission: string;
   commissionMembers: string[];
+  signers: Array<{
+    position: string;
+    name: string;
+  }>;
 }

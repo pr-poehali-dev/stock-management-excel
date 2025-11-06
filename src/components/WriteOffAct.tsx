@@ -19,10 +19,17 @@ export function WriteOffAct({ stockData, onDataUpdate }: WriteOffActProps) {
   const { user } = useAuth();
   const [actData, setActData] = useState<ActData>({
     actNumber: `АКТ-${new Date().getFullYear()}-${Date.now().toString().slice(-4)}`,
+    actTitle: 'Акт о списании материальных ценностей',
     date: new Date().toISOString().split('T')[0],
     responsible: '',
+    approvedBy: '',
     commission: '',
-    commissionMembers: ['', '', '']
+    commissionMembers: ['', '', ''],
+    signers: [
+      { position: 'Председатель комиссии', name: '' },
+      { position: 'Член комиссии', name: '' },
+      { position: 'Член комиссии', name: '' }
+    ]
   });
   const [items, setItems] = useState<ActItem[]>([
     { product: null, quantity: 0, reason: '' }
@@ -132,10 +139,17 @@ export function WriteOffAct({ stockData, onDataUpdate }: WriteOffActProps) {
 
     setActData({
       actNumber: `АКТ-${new Date().getFullYear()}-${Date.now().toString().slice(-4)}`,
+      actTitle: 'Акт о списании материальных ценностей',
       date: new Date().toISOString().split('T')[0],
       responsible: '',
+      approvedBy: '',
       commission: '',
-      commissionMembers: ['', '', '']
+      commissionMembers: ['', '', ''],
+      signers: [
+        { position: 'Председатель комиссии', name: '' },
+        { position: 'Член комиссии', name: '' },
+        { position: 'Член комиссии', name: '' }
+      ]
     });
     setItems([{ product: null, quantity: 0, reason: '' }]);
   };
@@ -143,10 +157,17 @@ export function WriteOffAct({ stockData, onDataUpdate }: WriteOffActProps) {
   const handleClear = () => {
     setActData({
       actNumber: `АКТ-${new Date().getFullYear()}-${Date.now().toString().slice(-4)}`,
+      actTitle: 'Акт о списании материальных ценностей',
       date: new Date().toISOString().split('T')[0],
       responsible: '',
+      approvedBy: '',
       commission: '',
-      commissionMembers: ['', '', '']
+      commissionMembers: ['', '', ''],
+      signers: [
+        { position: 'Председатель комиссии', name: '' },
+        { position: 'Член комиссии', name: '' },
+        { position: 'Член комиссии', name: '' }
+      ]
     });
     setItems([{ product: null, quantity: 0, reason: '' }]);
   };

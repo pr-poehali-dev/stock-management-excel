@@ -72,8 +72,16 @@ export function generateActHTML(
       </style>
     </head>
     <body>
+      ${actData.approvedBy ? `
+      <div style="text-align: right; margin-bottom: 1cm;">
+        <p><strong>Утверждено:</strong></p>
+        <p>${actData.approvedBy}</p>
+        <p>________________</p>
+      </div>
+      ` : ''}
+      
       <div class="header">
-        <h1>АКТ СПИСАНИЯ ТОВАРНО-МАТЕРИАЛЬНЫХ ЦЕННОСТЕЙ</h1>
+        <h1>${actData.actTitle || 'АКТ СПИСАНИЯ ТОВАРНО-МАТЕРИАЛЬНЫХ ЦЕННОСТЕЙ'}</h1>
         <p>№ ${actData.actNumber} от ${new Date(actData.date).toLocaleDateString('ru-RU')}</p>
       </div>
 
@@ -119,16 +127,19 @@ export function generateActHTML(
       </div>
 
       <div class="signatures">
-        <div class="signature-line">
-          <span>Ответственное лицо: ${actData.responsible || '______________'}</span>
-          <span>________________</span>
-        </div>
-        ${actData.commissionMembers.filter(m => m.trim()).map(member => `
+        <p><strong>Подписи:</strong></p>
+        ${actData.signers.filter(s => s.position || s.name).map(signer => `
           <div class="signature-line">
-            <span>Член комиссии: ${member}</span>
-            <span>________________</span>
+            <span>${signer.position || '_________________'}</span>
+            <span>______________ / ${signer.name || '_________________'}</span>
           </div>
         `).join('')}
+        ${actData.signers.filter(s => s.position || s.name).length === 0 ? `
+          <div class="signature-line">
+            <span>_________________</span>
+            <span>______________ / _________________</span>
+          </div>
+        ` : ''}
       </div>
     </body>
     </html>

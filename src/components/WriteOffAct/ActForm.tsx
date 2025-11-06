@@ -39,6 +39,14 @@ export function ActForm({
   return (
     <>
       <div className="grid gap-4 md:grid-cols-2 mb-6">
+        <div className="md:col-span-2">
+          <Label>Название акта</Label>
+          <Input 
+            value={actData.actTitle}
+            onChange={(e) => onActDataChange({ ...actData, actTitle: e.target.value })}
+            placeholder="Акт о списании материальных ценностей"
+          />
+        </div>
         <div>
           <Label>Номер акта</Label>
           <Input 
@@ -52,6 +60,14 @@ export function ActForm({
             type="date"
             value={actData.date}
             onChange={(e) => onActDataChange({ ...actData, date: e.target.value })}
+          />
+        </div>
+        <div className="md:col-span-2">
+          <Label>Утверждено</Label>
+          <Input 
+            placeholder="Должность и ФИО утверждающего лица"
+            value={actData.approvedBy}
+            onChange={(e) => onActDataChange({ ...actData, approvedBy: e.target.value })}
           />
         </div>
         <div>
@@ -203,6 +219,69 @@ export function ActForm({
         <div className="flex items-center justify-between p-4 bg-muted rounded-lg">
           <span className="font-semibold">Общая сумма списания:</span>
           <span className="text-2xl font-bold">{totalSum.toLocaleString('ru-RU')} ₽</span>
+        </div>
+
+        <div className="mt-6">
+          <Label className="text-base font-semibold mb-3 block">Подписанты</Label>
+          <div className="space-y-3">
+            {actData.signers.map((signer, idx) => (
+              <div key={idx} className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label className="text-sm">Должность</Label>
+                  <Input 
+                    placeholder="Должность"
+                    value={signer.position}
+                    onChange={(e) => {
+                      const newSigners = [...actData.signers];
+                      newSigners[idx].position = e.target.value;
+                      onActDataChange({ ...actData, signers: newSigners });
+                    }}
+                  />
+                </div>
+                <div className="flex gap-2">
+                  <div className="flex-1">
+                    <Label className="text-sm">ФИО</Label>
+                    <Input 
+                      placeholder="Фамилия И.О."
+                      value={signer.name}
+                      onChange={(e) => {
+                        const newSigners = [...actData.signers];
+                        newSigners[idx].name = e.target.value;
+                        onActDataChange({ ...actData, signers: newSigners });
+                      }}
+                    />
+                  </div>
+                  {actData.signers.length > 1 && (
+                    <Button 
+                      variant="ghost" 
+                      size="icon"
+                      className="mt-6 text-destructive hover:text-destructive"
+                      onClick={() => {
+                        const newSigners = actData.signers.filter((_, i) => i !== idx);
+                        onActDataChange({ ...actData, signers: newSigners });
+                      }}
+                    >
+                      <Icon name="X" size={16} />
+                    </Button>
+                  )}
+                </div>
+              </div>
+            ))}
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => {
+                onActDataChange({ 
+                  ...actData, 
+                  signers: [...actData.signers, { position: 'Член комиссии', name: '' }] 
+                });
+              }}
+              className="gap-2"
+            >
+              <Icon name="Plus" size={16} />
+              Добавить подписанта
+            </Button>
+          </div>
         </div>
 
         <div className="flex gap-2 justify-end">

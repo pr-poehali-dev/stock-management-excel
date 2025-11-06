@@ -36,8 +36,12 @@ export function ActPreview({
           <DialogTitle>Предпросмотр акта списания</DialogTitle>
         </DialogHeader>
         <div className="space-y-4 p-4 border rounded-lg">
+          <div className="text-right text-sm mb-2">
+            <p><strong>Утверждено:</strong></p>
+            <p>{actData.approvedBy || '_________________'}</p>
+          </div>
           <div className="text-center">
-            <h2 className="text-xl font-bold">АКТ СПИСАНИЯ ТОВАРНО-МАТЕРИАЛЬНЫХ ЦЕННОСТЕЙ</h2>
+            <h2 className="text-xl font-bold uppercase">{actData.actTitle || 'АКТ СПИСАНИЯ ТОВАРНО-МАТЕРИАЛЬНЫХ ЦЕННОСТЕЙ'}</h2>
             <p className="text-sm text-muted-foreground">
               № {actData.actNumber} от {new Date(actData.date).toLocaleDateString('ru-RU')}
             </p>
@@ -84,6 +88,24 @@ export function ActPreview({
           </div>
           <div className="text-right font-bold">
             Итого: {totalSum.toLocaleString('ru-RU')} ₽
+          </div>
+          
+          <div className="mt-6 space-y-3 text-sm">
+            <p className="font-semibold">Подписи:</p>
+            {actData.signers.filter(s => s.position || s.name).map((signer, idx) => (
+              <div key={idx} className="flex justify-between items-center border-b pb-2">
+                <span>{signer.position || '_________________'}</span>
+                <span className="text-right">
+                  __________ / {signer.name || '_________________'}
+                </span>
+              </div>
+            ))}
+            {actData.signers.filter(s => s.position || s.name).length === 0 && (
+              <div className="flex justify-between items-center border-b pb-2">
+                <span>_________________</span>
+                <span>__________ / _________________</span>
+              </div>
+            )}
           </div>
         </div>
         <div className="flex gap-2 justify-end">
