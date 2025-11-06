@@ -53,7 +53,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         cursor = conn.cursor()
         
         cursor.execute("""
-            SELECT name, inventory_number, quantity, min_stock, price, batch, created_at, updated_at
+            SELECT name, inventory_number, quantity, unit, min_stock, price, batch, created_at, updated_at
             FROM t_p72161094_stock_management_exc.products
             ORDER BY name
         """)
@@ -80,7 +80,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     header_alignment = Alignment(horizontal="center", vertical="center")
     
     # Headers
-    headers = ["Название", "Инвентарный номер", "Количество", "Мин. остаток", "Цена (₽)", "Партия", "Создан", "Обновлен"]
+    headers = ["Название", "Инвентарный номер", "Количество", "Единица измерения", "Мин. остаток", "Цена (₽)", "Партия", "Создан", "Обновлен"]
     ws.append(headers)
     
     for cell in ws[1]:
@@ -90,11 +90,12 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     
     # Data rows
     for product in products:
-        name, inventory_number, quantity, min_stock, price, batch, created_at, updated_at = product
+        name, inventory_number, quantity, unit, min_stock, price, batch, created_at, updated_at = product
         ws.append([
             name,
             inventory_number,
             quantity,
+            unit or "шт",
             min_stock,
             float(price) if price else 0,
             batch or "",
@@ -106,11 +107,12 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
     ws.column_dimensions['A'].width = 25
     ws.column_dimensions['B'].width = 15
     ws.column_dimensions['C'].width = 12
-    ws.column_dimensions['D'].width = 14
-    ws.column_dimensions['E'].width = 15
+    ws.column_dimensions['D'].width = 18
+    ws.column_dimensions['E'].width = 14
     ws.column_dimensions['F'].width = 15
-    ws.column_dimensions['G'].width = 18
+    ws.column_dimensions['G'].width = 15
     ws.column_dimensions['H'].width = 18
+    ws.column_dimensions['I'].width = 18
     
     # Save to BytesIO
     excel_file = BytesIO()
