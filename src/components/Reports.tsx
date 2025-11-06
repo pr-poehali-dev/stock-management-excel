@@ -16,6 +16,7 @@ const MOVEMENTS_API = 'https://functions.poehali.dev/178c4661-b69a-4921-8960-35d
 interface Movement {
   id?: number;
   date: string;
+  dateISO?: string;
   product: string;
   type: string;
   quantity: number;
@@ -63,6 +64,7 @@ export function Reports({ stockData }: ReportsProps) {
         const formattedMovements = (data.movements || []).map((m: any) => ({
           id: m.id,
           date: new Date(m.created_at).toLocaleDateString('ru-RU'),
+          dateISO: m.created_at,
           product: m.product_name,
           type: m.movement_type,
           quantity: m.movement_type === 'Поступление' ? m.quantity : -m.quantity,
@@ -82,11 +84,20 @@ export function Reports({ stockData }: ReportsProps) {
     let filtered = [...movements];
 
     if (filters.startDate) {
-      filtered = filtered.filter(m => new Date(m.date) >= new Date(filters.startDate));
+      filtered = filtered.filter(m => {
+        const movementDate = m.dateISO ? new Date(m.dateISO) : new Date();
+        const filterDate = new Date(filters.startDate);
+        return movementDate >= filterDate;
+      });
     }
 
     if (filters.endDate) {
-      filtered = filtered.filter(m => new Date(m.date) <= new Date(filters.endDate));
+      filtered = filtered.filter(m => {
+        const movementDate = m.dateISO ? new Date(m.dateISO) : new Date();
+        const filterDate = new Date(filters.endDate);
+        filterDate.setHours(23, 59, 59, 999);
+        return movementDate <= filterDate;
+      });
     }
 
     if (filters.productId !== 'all') {
@@ -104,13 +115,14 @@ export function Reports({ stockData }: ReportsProps) {
   };
 
   const getChartData = () => {
-    const groupedByDate: Record<string, { date: string; incoming: number; outgoing: number }> = {};
+    const groupedByDate: Record<string, { date: string; dateSort: string; incoming: number; outgoing: number }> = {};
 
     filteredMovements.forEach(movement => {
-      const dateKey = new Date(movement.date).toLocaleDateString('ru-RU');
+      const dateKey = movement.date;
+      const dateSortKey = movement.dateISO || '';
       
       if (!groupedByDate[dateKey]) {
-        groupedByDate[dateKey] = { date: dateKey, incoming: 0, outgoing: 0 };
+        groupedByDate[dateKey] = { date: dateKey, dateSort: dateSortKey, incoming: 0, outgoing: 0 };
       }
 
       if (movement.type === 'Поступление') {
@@ -121,8 +133,7 @@ export function Reports({ stockData }: ReportsProps) {
     });
 
     return Object.values(groupedByDate).sort((a, b) => 
-      new Date(a.date.split('.').reverse().join('-')).getTime() - 
-      new Date(b.date.split('.').reverse().join('-')).getTime()
+      new Date(a.dateSort).getTime() - new Date(b.dateSort).getTime()
     );
   };
 
