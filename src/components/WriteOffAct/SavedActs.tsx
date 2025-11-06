@@ -6,6 +6,7 @@ import Icon from "@/components/ui/icon";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { formatQuantity } from "@/utils/format";
+import { useToast } from "@/hooks/use-toast";
 
 const WRITEOFF_ACTS_API = 'https://functions.poehali.dev/9cfbeb44-bbad-4db8-86a7-72ee7edc0283';
 
@@ -33,6 +34,7 @@ interface SavedActsProps {
 }
 
 export function SavedActs({ onEditDraft }: SavedActsProps) {
+  const { toast } = useToast();
   const [acts, setActs] = useState<SavedAct[]>([]);
   const [selectedAct, setSelectedAct] = useState<SavedAct | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
@@ -60,6 +62,39 @@ export function SavedActs({ onEditDraft }: SavedActsProps) {
   const viewActDetails = (act: SavedAct) => {
     setSelectedAct(act);
     setIsDetailOpen(true);
+  };
+
+  const handleDeleteAct = async (actId: number) => {
+    if (!confirm('Вы уверены, что хотите удалить этот акт?')) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`${WRITEOFF_ACTS_API}?id=${actId}`, {
+        method: 'DELETE'
+      });
+
+      if (response.ok) {
+        toast({
+          title: "Успешно",
+          description: "Акт удалён"
+        });
+        loadActs();
+      } else {
+        toast({
+          title: "Ошибка",
+          description: "Не удалось удалить акт",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      console.error('Error deleting act:', error);
+      toast({
+        title: "Ошибка",
+        description: "Не удалось удалить акт",
+        variant: "destructive"
+      });
+    }
   };
 
   const getTotalSum = (items: SavedAct['items']) => {
@@ -160,6 +195,17 @@ export function SavedActs({ onEditDraft }: SavedActsProps) {
                         <Icon name="Eye" size={16} />
                         Просмотр
                       </Button>
+                      {act.is_draft && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDeleteAct(act.id)}
+                          className="gap-2 text-destructive hover:text-destructive"
+                        >
+                          <Icon name="Trash2" size={16} />
+                          Удалить
+                        </Button>
+                      )}
                     </div>
                   </TableCell>
                 </TableRow>
