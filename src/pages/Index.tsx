@@ -20,7 +20,9 @@ const IMPORT_API = 'https://functions.poehali.dev/1c73e0e3-b0c0-4736-9352-752eb1
 const CLEAR_DB_API = 'https://functions.poehali.dev/bab0feeb-2c4b-43b9-ba7b-e35e1cf7d977';
 
 const Index = () => {
+  console.log('Index component rendering');
   const { isAuthenticated, user, logout, isAdmin } = useAuth();
+  console.log('isAuthenticated:', isAuthenticated);
   const { isOnline, offlineData, saveOfflineData } = useOfflineStorage();
   const [activeTab, setActiveTab] = useState("stock");
   const [stockData, setStockData] = useState([]);
