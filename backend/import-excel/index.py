@@ -81,15 +81,17 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             
             name = str(row[0]) if row[0] else ''
             inventory_number = str(row[1]) if row[1] else ''
-            quantity = int(row[2]) if row[2] else 0
-            min_stock = int(row[3]) if row[3] else 0
-            price = float(row[4]) if row[4] else 0.0
-            batch = str(row[5]) if row[5] else ''
+            quantity = float(row[2]) if row[2] else 0.0
+            unit = str(row[3]) if row[3] else 'шт'
+            min_stock = float(row[4]) if row[4] else 0.0
+            price = float(row[5]) if row[5] else 0.0
+            batch = str(row[6]) if row[6] else ''
             
             products.append({
                 'name': name,
                 'inventory_number': inventory_number,
                 'quantity': quantity,
+                'unit': unit,
                 'min_stock': min_stock,
                 'price': price,
                 'batch': batch
@@ -104,6 +106,7 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
         for product in products:
             safe_inv = str(product['inventory_number']).replace("'", "''")
             safe_name = str(product['name']).replace("'", "''")
+            safe_unit = str(product['unit']).replace("'", "''")
             safe_batch = str(product['batch']).replace("'", "''")
             
             cursor.execute(
@@ -115,14 +118,14 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             if existing:
                 cursor.execute(
                     f"UPDATE products SET name = '{safe_name}', quantity = {product['quantity']}, " +
-                    f"min_stock = {product['min_stock']}, price = {product['price']}, " +
+                    f"unit = '{safe_unit}', min_stock = {product['min_stock']}, price = {product['price']}, " +
                     f"batch = '{safe_batch}', updated_at = NOW() WHERE inventory_number = '{safe_inv}'"
                 )
                 updated += 1
             else:
                 cursor.execute(
-                    f"INSERT INTO products (name, inventory_number, quantity, min_stock, price, batch) " +
-                    f"VALUES ('{safe_name}', '{safe_inv}', {product['quantity']}, " +
+                    f"INSERT INTO products (name, inventory_number, quantity, unit, min_stock, price, batch) " +
+                    f"VALUES ('{safe_name}', '{safe_inv}', {product['quantity']}, '{safe_unit}', " +
                     f"{product['min_stock']}, {product['price']}, '{safe_batch}')"
                 )
                 inserted += 1
