@@ -47,6 +47,17 @@ export function ActForm({
           <h3 className="text-lg font-semibold text-blue-900">Шапка акта</h3>
         </div>
         
+        <div className="mb-4 flex justify-end">
+          <div className="w-full md:w-1/2">
+            <Label>Утверждено</Label>
+            <Input 
+              placeholder="Должность и ФИО утверждающего лица"
+              value={actData.approvedBy}
+              onChange={(e) => onActDataChange({ ...actData, approvedBy: e.target.value })}
+            />
+          </div>
+        </div>
+        
         <div className="grid gap-4 md:grid-cols-2">
           <div className="md:col-span-2">
             <Label>Название акта</Label>
@@ -71,15 +82,6 @@ export function ActForm({
               type="date"
               value={actData.date}
               onChange={(e) => onActDataChange({ ...actData, date: e.target.value })}
-            />
-          </div>
-          
-          <div className="md:col-span-2">
-            <Label>Утверждено</Label>
-            <Input 
-              placeholder="Должность и ФИО утверждающего лица"
-              value={actData.approvedBy}
-              onChange={(e) => onActDataChange({ ...actData, approvedBy: e.target.value })}
             />
           </div>
           
