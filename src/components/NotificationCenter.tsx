@@ -101,7 +101,7 @@ export function NotificationCenter({ stockData }: NotificationCenterProps) {
 
   const markAsRead = (id: string) => {
     setNotifications(prev =>
-      prev.map(n => n.id === id ? { ...n, read: true } : n)
+      prev.filter(n => n.id !== id)
     );
   };
 
