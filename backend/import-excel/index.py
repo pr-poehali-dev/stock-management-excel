@@ -110,24 +110,50 @@ def handler(event: Dict[str, Any], context: Any) -> Dict[str, Any]:
             safe_batch = str(product['batch']).replace("'", "''")
             
             cursor.execute(
-                f"SELECT id FROM products WHERE inventory_number = '{safe_inv}'"
+                f"SELECT id, quantity FROM products WHERE inventory_number = '{safe_inv}'"
             )
             
             existing = cursor.fetchone()
             
             if existing:
+                product_id = existing[0]
+                old_quantity = float(existing[1]) if existing[1] else 0.0
+                new_quantity = float(product['quantity'])
+                quantity_diff = new_quantity - old_quantity
+                
                 cursor.execute(
                     f"UPDATE products SET name = '{safe_name}', quantity = {product['quantity']}, " +
                     f"unit = '{safe_unit}', min_stock = {product['min_stock']}, price = {product['price']}, " +
                     f"batch = '{safe_batch}', updated_at = NOW() WHERE inventory_number = '{safe_inv}'"
                 )
+                
+                if quantity_diff > 0:
+                    cursor.execute(
+                        f"INSERT INTO movements (product_id, movement_type, quantity, user_name, supplier) " +
+                        f"VALUES ({product_id}, 'Поступление', {quantity_diff}, 'Импорт из Excel', 'Excel импорт')"
+                    )
+                elif quantity_diff < 0:
+                    cursor.execute(
+                        f"INSERT INTO movements (product_id, movement_type, quantity, user_name, reason) " +
+                        f"VALUES ({product_id}, 'Списание', {abs(quantity_diff)}, 'Импорт из Excel', 'Корректировка импорта')"
+                    )
+                
                 updated += 1
             else:
                 cursor.execute(
                     f"INSERT INTO products (name, inventory_number, quantity, unit, min_stock, price, batch) " +
                     f"VALUES ('{safe_name}', '{safe_inv}', {product['quantity']}, '{safe_unit}', " +
-                    f"{product['min_stock']}, {product['price']}, '{safe_batch}')"
+                    f"{product['min_stock']}, {product['price']}, '{safe_batch}') RETURNING id"
                 )
+                
+                product_id = cursor.fetchone()[0]
+                
+                if product['quantity'] > 0:
+                    cursor.execute(
+                        f"INSERT INTO movements (product_id, movement_type, quantity, user_name, supplier) " +
+                        f"VALUES ({product_id}, 'Поступление', {product['quantity']}, 'Импорт из Excel', 'Excel импорт')"
+                    )
+                
                 inserted += 1
         
         conn.commit()
