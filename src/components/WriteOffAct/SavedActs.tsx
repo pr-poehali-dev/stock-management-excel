@@ -16,6 +16,7 @@ interface SavedAct {
   responsible_person: string;
   reason: string;
   items: Array<{
+    product_id: number;
     product_name: string;
     inventory_number: string;
     quantity: number;
@@ -27,7 +28,11 @@ interface SavedAct {
   is_draft: boolean;
 }
 
-export function SavedActs() {
+interface SavedActsProps {
+  onEditDraft?: (act: SavedAct) => void;
+}
+
+export function SavedActs({ onEditDraft }: SavedActsProps) {
   const [acts, setActs] = useState<SavedAct[]>([]);
   const [selectedAct, setSelectedAct] = useState<SavedAct | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
@@ -134,15 +139,28 @@ export function SavedActs() {
                     {new Date(act.created_at).toLocaleDateString('ru-RU')}
                   </TableCell>
                   <TableCell>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => viewActDetails(act)}
-                      className="gap-2"
-                    >
-                      <Icon name="Eye" size={16} />
-                      Просмотр
-                    </Button>
+                    <div className="flex gap-2">
+                      {act.is_draft && onEditDraft && (
+                        <Button
+                          variant="default"
+                          size="sm"
+                          onClick={() => onEditDraft(act)}
+                          className="gap-2"
+                        >
+                          <Icon name="Edit" size={16} />
+                          Редактировать
+                        </Button>
+                      )}
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => viewActDetails(act)}
+                        className="gap-2"
+                      >
+                        <Icon name="Eye" size={16} />
+                        Просмотр
+                      </Button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}

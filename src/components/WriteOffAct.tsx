@@ -258,6 +258,40 @@ export function WriteOffAct({ stockData, onDataUpdate }: WriteOffActProps) {
     setItems([{ product: null, quantity: 0, reason: '' }]);
   };
 
+  const handleEditDraft = (act: any) => {
+    const actItems: ActItem[] = act.items.map((item: any) => {
+      const stockProduct = stockData.find(p => p.id === item.product_id);
+      return {
+        product: stockProduct || null,
+        quantity: item.quantity,
+        reason: item.reason
+      };
+    });
+
+    setActData({
+      actNumber: act.act_number,
+      actTitle: 'Акт о списании материальных ценностей',
+      date: act.act_date,
+      responsible: act.responsible_person,
+      approvedBy: ['', '', '', '', '', '', ''],
+      commission: act.reason,
+      commissionMembers: ['', '', ''],
+      signers: [
+        { position: 'Председатель комиссии', name: '' },
+        { position: 'Член комиссии', name: '' },
+        { position: 'Член комиссии', name: '' }
+      ]
+    });
+    setItems(actItems);
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    
+    toast({
+      title: "Черновик загружен",
+      description: "Вы можете продолжить редактирование акта"
+    });
+  };
+
   return (
     <div className="space-y-6">
       <Card className="p-6">
@@ -290,7 +324,7 @@ export function WriteOffAct({ stockData, onDataUpdate }: WriteOffActProps) {
         />
       </Card>
 
-      <SavedActs />
+      <SavedActs onEditDraft={handleEditDraft} />
     </div>
   );
 }
