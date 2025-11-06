@@ -12,6 +12,7 @@ import { WriteOffAct } from "@/components/WriteOffAct";
 import { Dashboard } from "@/components/Dashboard";
 import { StockAlerts } from "@/components/NotificationCenter";
 import { StockToolbar } from "@/components/Toolbar/StockToolbar";
+import { UsersManagement } from "@/components/UsersManagement";
 import { useToast } from "@/hooks/use-toast";
 import { useOfflineStorage } from "@/hooks/useOfflineStorage";
 
@@ -380,6 +381,12 @@ const Index = () => {
               <Icon name="BarChart3" size={16} />
               Отчёты
             </TabsTrigger>
+            {isAdmin && (
+              <TabsTrigger value="users" className="gap-2 rounded-none border-b-2 border-transparent data-[state=active]:border-[#217346] data-[state=active]:bg-white px-4 py-2">
+                <Icon name="Users" size={16} />
+                Пользователи
+              </TabsTrigger>
+            )}
           </TabsList>
 
           <div className="p-6">
@@ -423,6 +430,12 @@ const Index = () => {
             <div className={activeTab === "reports" ? "" : "hidden"}>
               <Reports chartData={chartData} categoryData={categoryData} />
             </div>
+
+            {isAdmin && (
+              <div className={activeTab === "users" ? "" : "hidden"}>
+                <UsersManagement />
+              </div>
+            )}
           </div>
         </Tabs>
       </div>

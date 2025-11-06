@@ -1,0 +1,1 @@
+INSERT INTO t_p72161094_stock_management_exc.users (username, password, name, role) VALUES ('admin', 'admin123', 'Администратор', 'admin');
