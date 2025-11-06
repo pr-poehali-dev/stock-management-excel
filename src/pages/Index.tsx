@@ -9,6 +9,7 @@ import { StatsCards } from "@/components/StatsCards";
 import { StockTabs } from "@/components/StockTabs";
 import { Reports } from "@/components/Reports";
 import { WriteOffAct } from "@/components/WriteOffAct";
+import { Dashboard } from "@/components/Dashboard";
 import { StockAlerts } from "@/components/NotificationCenter";
 import { StockToolbar } from "@/components/Toolbar/StockToolbar";
 import { useToast } from "@/hooks/use-toast";
@@ -23,7 +24,7 @@ const CLEAR_DB_API = 'https://functions.poehali.dev/bab0feeb-2c4b-43b9-ba7b-e35e
 const Index = () => {
   const { isAuthenticated, user, logout, isAdmin } = useAuth();
   const { isOnline, offlineData, saveOfflineData } = useOfflineStorage();
-  const [activeTab, setActiveTab] = useState("stock");
+  const [activeTab, setActiveTab] = useState("dashboard");
   const [stockData, setStockData] = useState([]);
   const [recentMovements, setRecentMovements] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -355,6 +356,10 @@ const Index = () => {
       <div>
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="w-full justify-start bg-[#f3f3f3] border-b rounded-none h-auto p-0">
+            <TabsTrigger value="dashboard" className="gap-2 rounded-none border-b-2 border-transparent data-[state=active]:border-[#217346] data-[state=active]:bg-white px-4 py-2">
+              <Icon name="LayoutDashboard" size={16} />
+              Дашборд
+            </TabsTrigger>
             <TabsTrigger value="stock" className="gap-2 rounded-none border-b-2 border-transparent data-[state=active]:border-[#217346] data-[state=active]:bg-white px-4 py-2">
               <Icon name="Database" size={16} />
               Остатки
@@ -378,7 +383,15 @@ const Index = () => {
           </TabsList>
 
           <div className="p-6">
-            <StockAlerts stockData={stockData} />
+            {activeTab !== "dashboard" && <StockAlerts stockData={stockData} />}
+            
+            {activeTab === "dashboard" && (
+              <Dashboard 
+                stockData={stockData}
+                recentMovements={recentMovements}
+                chartData={chartData}
+              />
+            )}
             
             {activeTab === "stock" && (
               <div className="mb-6">
