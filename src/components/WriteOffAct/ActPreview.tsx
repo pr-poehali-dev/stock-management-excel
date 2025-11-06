@@ -38,7 +38,9 @@ export function ActPreview({
         <div className="space-y-4 p-4 border rounded-lg">
           <div className="text-right text-sm mb-2">
             <p><strong>Утверждено:</strong></p>
-            <p>{actData.approvedBy || '_________________'}</p>
+            {actData.approvedBy.map((line, idx) => (
+              <p key={idx}>{line || '_________________'}</p>
+            ))}
           </div>
           <div className="text-center">
             <h2 className="text-xl font-bold uppercase">{actData.actTitle || 'АКТ СПИСАНИЯ ТОВАРНО-МАТЕРИАЛЬНЫХ ЦЕННОСТЕЙ'}</h2>

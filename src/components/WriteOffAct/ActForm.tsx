@@ -50,11 +50,20 @@ export function ActForm({
         <div className="mb-4 flex justify-end">
           <div className="w-full md:w-1/2">
             <Label>Утверждено</Label>
-            <Input 
-              placeholder="Должность и ФИО утверждающего лица"
-              value={actData.approvedBy}
-              onChange={(e) => onActDataChange({ ...actData, approvedBy: e.target.value })}
-            />
+            <div className="space-y-2 mt-2">
+              {actData.approvedBy.map((line, idx) => (
+                <Input 
+                  key={idx}
+                  placeholder={`Строка ${idx + 1}`}
+                  value={line}
+                  onChange={(e) => {
+                    const newApprovedBy = [...actData.approvedBy];
+                    newApprovedBy[idx] = e.target.value;
+                    onActDataChange({ ...actData, approvedBy: newApprovedBy });
+                  }}
+                />
+              ))}
+            </div>
           </div>
         </div>
         

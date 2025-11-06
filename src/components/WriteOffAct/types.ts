@@ -17,7 +17,7 @@ export interface ActData {
   actTitle: string;
   date: string;
   responsible: string;
-  approvedBy: string;
+  approvedBy: string[];
   commission: string;
   commissionMembers: string[];
   signers: Array<{

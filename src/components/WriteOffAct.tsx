@@ -22,7 +22,7 @@ export function WriteOffAct({ stockData, onDataUpdate }: WriteOffActProps) {
     actTitle: 'Акт о списании материальных ценностей',
     date: new Date().toISOString().split('T')[0],
     responsible: '',
-    approvedBy: '',
+    approvedBy: ['', '', '', '', '', '', ''],
     commission: '',
     commissionMembers: ['', '', ''],
     signers: [
@@ -142,7 +142,7 @@ export function WriteOffAct({ stockData, onDataUpdate }: WriteOffActProps) {
       actTitle: 'Акт о списании материальных ценностей',
       date: new Date().toISOString().split('T')[0],
       responsible: '',
-      approvedBy: '',
+      approvedBy: ['', '', '', '', '', '', ''],
       commission: '',
       commissionMembers: ['', '', ''],
       signers: [
@@ -160,7 +160,7 @@ export function WriteOffAct({ stockData, onDataUpdate }: WriteOffActProps) {
       actTitle: 'Акт о списании материальных ценностей',
       date: new Date().toISOString().split('T')[0],
       responsible: '',
-      approvedBy: '',
+      approvedBy: ['', '', '', '', '', '', ''],
       commission: '',
       commissionMembers: ['', '', ''],
       signers: [

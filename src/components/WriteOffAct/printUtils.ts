@@ -72,11 +72,10 @@ export function generateActHTML(
       </style>
     </head>
     <body>
-      ${actData.approvedBy ? `
+      ${actData.approvedBy.some(line => line.trim()) ? `
       <div style="text-align: right; margin-bottom: 1cm;">
         <p><strong>Утверждено:</strong></p>
-        <p>${actData.approvedBy}</p>
-        <p>________________</p>
+        ${actData.approvedBy.map(line => `<p>${line || '_________________'}</p>`).join('')}
       </div>
       ` : ''}
       
