@@ -4,10 +4,12 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { ActPreview } from "./WriteOffAct/ActPreview";
 import { ActForm } from "./WriteOffAct/ActForm";
+import { SavedActs } from "./WriteOffAct/SavedActs";
 import { generateActHTML, printActDocument } from "./WriteOffAct/printUtils";
 import { StockItem, ActItem, ActData } from "./WriteOffAct/types";
 
 const MOVEMENTS_API = 'https://functions.poehali.dev/178c4661-b69a-4921-8960-35d7db62c2d5';
+const WRITEOFF_ACTS_API = 'https://functions.poehali.dev/9cfbeb44-bbad-4db8-86a7-72ee7edc0283';
 
 interface WriteOffActProps {
   stockData: StockItem[];
@@ -130,9 +132,45 @@ export function WriteOffAct({ stockData, onDataUpdate }: WriteOffActProps) {
     }
   };
 
+  const saveActToDatabase = async () => {
+    const validItems = items.filter(item => item.product && item.quantity > 0);
+    
+    const actItems = validItems.map(item => ({
+      product_id: item.product?.id,
+      product_name: item.product?.name,
+      inventory_number: item.product?.inventory_number,
+      quantity: item.quantity,
+      price: item.product?.price || 0,
+      reason: item.reason
+    }));
+
+    try {
+      const response = await fetch(WRITEOFF_ACTS_API, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          act_number: actData.actNumber,
+          act_date: actData.date,
+          responsible_person: actData.responsible,
+          reason: actData.commission,
+          items: actItems,
+          created_by: user?.name || 'Администратор'
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to save act');
+      }
+    } catch (error) {
+      console.error('Error saving act:', error);
+    }
+  };
+
   const printAct = async () => {
     const success = await processWriteOff();
     if (!success) return;
+
+    await saveActToDatabase();
 
     const actHTML = generateActHTML(actData, items, getTotalSum());
     printActDocument(actHTML);
@@ -202,6 +240,8 @@ export function WriteOffAct({ stockData, onDataUpdate }: WriteOffActProps) {
           isProcessing={isProcessing}
         />
       </Card>
+
+      <SavedActs />
     </div>
   );
 }
