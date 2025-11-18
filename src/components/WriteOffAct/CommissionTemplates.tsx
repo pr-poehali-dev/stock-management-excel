@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import Icon from "@/components/ui/icon";
 import { useToast } from "@/hooks/use-toast";
@@ -139,6 +139,7 @@ export function CommissionTemplates({ onApplyTemplate }: CommissionTemplatesProp
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle>Создать шаблон комиссии</DialogTitle>
+            <DialogDescription>Сохранение состава комиссии для быстрого использования</DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div>

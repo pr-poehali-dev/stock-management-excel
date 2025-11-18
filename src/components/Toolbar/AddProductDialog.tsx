@@ -1,4 +1,4 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -41,6 +41,7 @@ export function AddProductDialog({
       <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle>Новый товар</DialogTitle>
+          <DialogDescription>Заполните информацию о новом товаре</DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="grid grid-cols-4 items-center gap-4">

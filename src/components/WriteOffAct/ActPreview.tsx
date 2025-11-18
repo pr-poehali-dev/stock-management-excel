@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import Icon from "@/components/ui/icon";
 import { ActItem, ActData } from "./types";
 import { formatQuantity } from "@/utils/format";
@@ -34,6 +34,7 @@ export function ActPreview({
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Предпросмотр акта списания</DialogTitle>
+          <DialogDescription>Просмотр документа перед печатью</DialogDescription>
         </DialogHeader>
         <div className="space-y-4 p-4 border rounded-lg">
           <div className="text-right text-sm mb-2">

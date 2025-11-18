@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import Icon from "@/components/ui/icon";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { formatQuantity } from "@/utils/format";
 import { useToast } from "@/hooks/use-toast";
 
@@ -219,6 +219,7 @@ export function SavedActs({ onEditDraft }: SavedActsProps) {
         <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Детали акта {selectedAct?.act_number}</DialogTitle>
+            <DialogDescription>Полная информация об акте списания</DialogDescription>
           </DialogHeader>
 
           {selectedAct && (

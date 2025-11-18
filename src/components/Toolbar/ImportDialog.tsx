@@ -1,4 +1,4 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Icon from "@/components/ui/icon";
@@ -31,11 +31,11 @@ export function ImportDialog({
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Импорт из Excel</DialogTitle>
+          <DialogDescription>
+            Загрузите Excel файл с товарами. Файл должен содержать колонки: Название, Инвентарный номер, Количество, Единица измерения, Мин. остаток, Цена, Партия
+          </DialogDescription>
         </DialogHeader>
         <div className="space-y-4 py-4">
-          <p className="text-sm text-muted-foreground">
-            Загрузите Excel файл с товарами. Файл должен содержать колонки: Название, Инвентарный номер, Количество, Единица измерения, Мин. остаток, Цена, Партия
-          </p>
           <Input
             type="file"
             accept=".xlsx,.xls"
